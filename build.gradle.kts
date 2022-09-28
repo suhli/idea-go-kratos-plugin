@@ -21,6 +21,7 @@ version = properties("pluginVersion")
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven(url="https://www.jetbrains.com/intellij-repository/releases")
 }
 
 // Set the JVM language level used to compile sources and generate files - Java 11 is required since 2020.3
@@ -58,6 +59,11 @@ tasks {
     wrapper {
         gradleVersion = properties("gradleVersion")
     }
+
+    runIde {
+        autoReloadPlugins.set(true)
+    }
+
 
     patchPluginXml {
         version.set(properties("pluginVersion"))

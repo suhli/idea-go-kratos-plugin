@@ -3,16 +3,19 @@
     <id>com.github.suhli.ideaplugingodemo</id>
     <name>idea-plugin-go-demo</name>
     <vendor>suhli</vendor>
-
+    <resource-bundle>messages.GoPluginDemoBundle</resource-bundle>
     <depends>com.intellij.modules.platform</depends>
-
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.go</depends>
+    <depends>org.jetbrains.plugins.go</depends>
+    <dependencies>
+        <plugin id="com.intellij.modules.lang"/>
+    </dependencies>
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.suhli.ideaplugingodemo.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.suhli.ideaplugingodemo.services.MyProjectService"/>
+        <runLineMarkerContributor language="go"
+                           implementationClass="com.github.suhli.ideaplugingodemo.GoAutowire"></runLineMarkerContributor>
     </extensions>
-
-    <applicationListeners>
-        <listener class="com.github.suhli.ideaplugingodemo.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
+    <actions>
+        <action class="com.github.suhli.ideaplugingodemo.AutowireRunner" id="runAutowiredFileAction" ></action>
+    </actions>
 </idea-plugin>
