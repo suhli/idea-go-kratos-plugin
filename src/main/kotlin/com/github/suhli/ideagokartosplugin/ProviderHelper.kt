@@ -168,9 +168,8 @@ class ProviderHelper {
                 notExistsRequirementDeclarations.add("${notExists.type.text}")
             }
             val plainWire = """
-               //go:build wireinject
+               //go:build wireinject  
                
-               // +build wireinject
 
                // The build tag makes sure the stub is not built in the final build.
                package main_test
@@ -179,6 +178,19 @@ class ProviderHelper {
                     $injectionImports
                     "github.com/google/wire"
                     "github.com/go-kratos/kratos/v2"
+                    "os"
+                    "github.com/go-kratos/kratos/v2/transport/grpc"
+                    "github.com/go-kratos/kratos/v2/transport/http"
+                    
+               )
+               
+               var (
+               	// Name is the name of the compiled software.
+               	Name string
+               	// Version is the version of the compiled software.
+               	Version string
+
+               	id, _ = os.Hostname()
                )
                
                func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
