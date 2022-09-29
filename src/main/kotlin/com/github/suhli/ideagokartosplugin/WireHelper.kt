@@ -3,6 +3,7 @@ package com.github.suhli.ideagokartosplugin
 import com.github.suhli.ideagokartosplugin.extends.Provider
 import com.github.suhli.ideagokartosplugin.extends.ProviderSet
 import com.github.suhli.ideagokartosplugin.extends.ProviderType
+import com.github.suhli.ideagokartosplugin.extends.WireConfig
 import com.goide.GoFileType
 import com.goide.formatter.GoFormatterUtil
 import com.goide.psi.GoFile
@@ -10,10 +11,15 @@ import com.goide.psi.GoFunctionDeclaration
 import com.goide.psi.GoType
 import com.goide.psi.impl.GoPackage
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
+import org.jetbrains.plugins.terminal.TerminalToolWindowFactory
+import org.jetbrains.plugins.terminal.TerminalView
+
 
 class WireHelper {
     companion object {
@@ -47,8 +53,12 @@ class WireHelper {
             return """"${v.getImportPath(false)}""""
         }
 
-        fun createWire(dir: PsiDirectory) {
-            val providerSets = collectWireProviderSets(dir)
+        fun createWire(dir: PsiDirectory,config:WireConfig) {
+            var targetDir = dir
+            if(config.location.isNotEmpty()){
+                targetDir = DirHelper.cd(dir,config.location) ?: throw RuntimeException("no such dir")
+            }
+            val providerSets = collectProviderSets(dir)
             val applicationManager = ApplicationManager.getApplication()
             for (providerSet in providerSets) {
                 val providerTokens = providerSet.providers.map { v ->
@@ -88,7 +98,7 @@ class WireHelper {
                
 
                // The build tag makes sure the stub is not built in the final build.
-               package main_test
+               package main
                import (
                     ${notExistRequirementsImports.joinToString("\n")}
                     $injectionImports
@@ -128,28 +138,32 @@ class WireHelper {
                     panic(wire.Build($injections, newApp))
                }
             """.trimIndent()
-            val wireFileName = "wire.gen_test.go"
+            val wireFileName = "wire.gen.go"
             val wireFile =
-                PsiFileFactory.getInstance(dir.project)
+                PsiFileFactory.getInstance(targetDir.project)
                     .createFileFromText(wireFileName, GoFileType.INSTANCE, plainWire)
             GoFormatterUtil.reformat(wireFile)
+            val cmd = "cd ${targetDir.virtualFile.canonicalPath} && wire"
             applicationManager.runWriteAction {
-                dir.files.find { v -> v.name == wireFileName }?.delete()
-                dir.add(wireFile)
+                targetDir.files.find { v -> v.name == wireFileName }?.delete()
+                targetDir.add(wireFile)
+                println(cmd)
+                val terminalView: TerminalView = TerminalView.getInstance(targetDir.project)
+                terminalView.createLocalShellWidget(null,"wire").executeCommand(cmd)
             }
         }
 
-        private fun collectWireProviderSets(dir: PsiDirectory): ArrayList<ProviderSet> {
+        private fun collectProviderSets(dir: PsiDirectory): ArrayList<ProviderSet> {
             val providers = arrayListOf<ProviderSet>()
             for (sub in dir.subdirectories) {
-                providers.addAll(collectWireProviderSets(sub))
+                providers.addAll(collectProviderSets(sub))
             }
-            val provider = collectProviderSet(dir)
+            val provider = collectProviderSetInDir(dir)
             if (provider != null) providers.add(provider)
             return providers
         }
 
-        private fun collectProviderSet(dir: PsiDirectory): ProviderSet? {
+        private fun collectProviderSetInDir(dir: PsiDirectory): ProviderSet? {
             val providers = arrayListOf<Provider>()
             for (file in dir.files) {
                 if (file !is GoFile) {

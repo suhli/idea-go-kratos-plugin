@@ -8,6 +8,7 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.go</depends>
     <depends>org.jetbrains.plugins.go</depends>
+    <depends>org.jetbrains.plugins.terminal</depends>
     <extensions defaultExtensionNs="com.intellij">
         <runLineMarkerContributor language=""
                                   implementationClass="com.github.suhli.ideagokartosplugin.wire.CreateWireCommentMarkerContributor"/>

@@ -22,11 +22,7 @@ class CreateWireCommentMarkerContributor  : RunLineMarkerContributor(), DumbAwar
         }
         val actions = arrayOf<AnAction>(ActionManager.getInstance().getAction(CreateWireAction.ID))
         return Info(
-            AllIcons.RunConfigurations.TestState.Run, actions
-        ) { psiElement: PsiElement ->
-            StringUtil.join(ContainerUtil.mapNotNull(actions) { action ->
-                "Create wire.go"
-            }, "\n")
-        }
+            AllIcons.RunConfigurations.TestState.Run, actions,null
+        )
     }
 }
