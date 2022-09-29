@@ -1,104 +1,23 @@
 package com.github.suhli.ideagokartosplugin
 
+import com.github.suhli.ideagokartosplugin.extends.Provider
+import com.github.suhli.ideagokartosplugin.extends.ProviderSet
+import com.github.suhli.ideagokartosplugin.extends.ProviderType
 import com.goide.GoFileType
 import com.goide.formatter.GoFormatterUtil
-import com.goide.psi.*
+import com.goide.psi.GoFile
+import com.goide.psi.GoFunctionDeclaration
+import com.goide.psi.GoType
 import com.goide.psi.impl.GoPackage
-import com.goide.psi.impl.GoPackageClauseImpl
-import com.goide.sdk.GoPackageUtil
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.psi.*
+import com.intellij.psi.PsiComment
+import com.intellij.psi.PsiDirectory
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiFileFactory
 
-class ProviderHelper {
-
-
-    class Provider(val declaration: GoFunctionDeclaration) {
-        val pkg: GoPackageClause =
-            declaration.containingFile.children.find { v -> v is GoPackageClause } as GoPackageClause
-        val name = declaration.name
-        val path = declaration.containingFile.getImportPath(false)
-        val goPkg =
-            GoPackageUtil.findByImportPath(path!!, declaration.project, null, ResolveState.initial()).first()
-        private val imports: Map<String, GoPackage>
-
-        init {
-            imports = hashMapOf<String, GoPackage>()
-            val importList = declaration.containingFile.imports
-            for (i in importList) {
-                val pkg = GoPackageUtil.findByImportPath(i.path, i.project, null, ResolveState.initial()).first()
-                if (i.alias != null) {
-                    imports.put(i.alias!!, pkg)
-                } else {
-                    imports.put(pkg.name, pkg)
-                }
-            }
-        }
-
-        private fun goTypeToProviderType(type: GoType?): ProviderType? {
-            val text = type?.text
-            if (text == null) {
-                return null
-            }
-            if (text.contains(".")) {
-                val argList = text.split(".")
-                var pkgName = argList.first()
-                if(pkgName.startsWith("*")){
-                    pkgName = pkgName.substring(1)
-                }
-                val pkg = imports.get(pkgName) ?: return null
-                return ProviderType(type, pkg)
-            } else {
-                return ProviderType(type, goPkg)
-            }
-        }
-
-        val returns: List<ProviderType>
-            get() {
-                val list = arrayListOf<ProviderType>()
-                val returns = declaration.resultType
-                val type = goTypeToProviderType(returns) ?: return list
-                list.add(type)
-                return list
-            }
-
-        val arguments: List<ProviderType>
-            get() {
-                val list = arrayListOf<ProviderType>()
-                val params =
-                    declaration.children.first().children.first().children.filterIsInstance<GoParameterDeclaration>()
-                for (param in params) {
-                    val type = goTypeToProviderType(param.type) ?: continue
-                    list.add(type)
-                }
-                return list
-            }
-    }
-
-    class ProviderSet(val providers: ArrayList<Provider>) {
-        val pkg = providers.first().pkg
-        val goPkg = providers.first().goPkg
-        val name =  """${pkg.name?.replaceFirstChar { v -> v.uppercaseChar() }}ProviderSets"""
-        var file: PsiFile? = null
-
-        val arguments: List<ProviderType>
-        val returns: List<ProviderType>
-
-        init {
-            arguments = arrayListOf<ProviderType>()
-            returns = arrayListOf<ProviderType>()
-            for (provider in providers) {
-                arguments.addAll(provider.arguments)
-                returns.addAll(provider.returns)
-            }
-        }
-    }
-
-    class ProviderType(val type: GoType, val pkg: GoPackage) {
-        val identifier = "${pkg.getImportPath(false).toString()}.${ProviderHelper.getRealType(type)}"
-    }
-
+class WireHelper {
     companion object {
-        const val TOKEN = "wired"
+        private const val TOKEN = "wired"
 
         fun getRealType(type: GoType?): String? {
             val text = type?.text ?: return null
@@ -124,11 +43,11 @@ class ProviderHelper {
             return notExistsArguments
         }
 
-        fun packageToImport(v:GoPackage): String {
+        private fun packageToImport(v:GoPackage): String {
             return """"${v.getImportPath(false)}""""
         }
 
-        public fun createWire(dir: PsiDirectory) {
+        fun createWire(dir: PsiDirectory) {
             val providerSets = collectWireProviderSets(dir)
             val applicationManager = ApplicationManager.getApplication()
             for (providerSet in providerSets) {
@@ -156,16 +75,13 @@ class ProviderHelper {
                 }
             }
             val notExistRequirements = scanForNotProvideTypes(providerSets)
-//            val imports = notExistRequirements.map { v->packageToImport(v.pkg) }.joinToString("\n")
-            val injectionImports = providerSets.map { v->packageToImport(v.goPkg) }.joinToString("\n")
-            val injections = providerSets.map { v->"""${v.pkg.name}.${v.name}""" }.joinToString(",")
-//            val notExistsRequirementDeclarations = notExistRequirements.map { v->v. }
+            val injectionImports = providerSets.joinToString("\n") { v -> packageToImport(v.goPkg) }
+            val injections = providerSets.joinToString(",") { v -> """${v.pkg.name}.${v.name}""" }
             val notExistRequirementsImports = arrayListOf<String>()
             val notExistsRequirementDeclarations = arrayListOf<String>()
-            for((index,notExists) in notExistRequirements.withIndex()){
-                val name = notExists.pkg.name + index
-                notExistRequirementsImports.add("${packageToImport(notExists.pkg)}")
-                notExistsRequirementDeclarations.add("${notExists.type.text}")
+            for(notExists in notExistRequirements){
+                notExistRequirementsImports.add(packageToImport(notExists.pkg))
+                notExistsRequirementDeclarations.add(notExists.type.text)
             }
             val plainWire = """
                //go:build wireinject  
@@ -262,44 +178,5 @@ class ProviderHelper {
             return providers
         }
 
-        private fun lookupPackage(dir: PsiDirectory): GoPackageClauseImpl? {
-            val file = dir.files.find { v -> v.fileType is GoFileType }
-            return (file?.children?.find { v -> v is GoPackageClause } ?: return null) as GoPackageClauseImpl
-        }
-
-        fun createProviderSet(dir: PsiDirectory) {
-
-            val providers = arrayListOf<Provider>()
-            for (file in dir.files) {
-                providers.addAll(collectProviders(file))
-            }
-            if (providers.isEmpty()) {
-                return
-            }
-            val pkg = lookupPackage(dir) ?: return
-            val fileName = "${pkg.name}.wire.go"
-
-            val providerTokens = providers.map { v ->
-                v.name
-            }.joinToString(",")
-            val result = """
-            package ${pkg.name}
-            
-            import (
-                "github.com/google/wire"
-            )
-            
-            //kartos plugin generate
-            var ${pkg.name?.replaceFirstChar { v -> v.uppercaseChar() }}ProviderSets = wire.NewSet($providerTokens)
-        """.trimIndent()
-
-            val resultFile =
-                PsiFileFactory.getInstance(dir.project).createFileFromText(fileName, GoFileType.INSTANCE, result)
-            val applicationManager = ApplicationManager.getApplication()
-            applicationManager.runWriteAction {
-                dir.files.find { v -> v.name == fileName }?.delete()
-                dir.add(resultFile)
-            }
-        }
     }
 }

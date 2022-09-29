@@ -9,17 +9,11 @@
     <depends>com.intellij.modules.go</depends>
     <depends>org.jetbrains.plugins.go</depends>
     <extensions defaultExtensionNs="com.intellij">
-<!--        <runLineMarkerContributor language="go"-->
-<!--                                  implementationClass="com.github.suhli.ideagokartosplugin.provider.ProviderCommentMakerContributor"/>-->
         <runLineMarkerContributor language=""
                                   implementationClass="com.github.suhli.ideagokartosplugin.wire.CreateWireCommentMarkerContributor"/>
     </extensions>
     <actions>
-<!--        <action class="com.github.suhli.ideagokartosplugin.provider.CreateProviderSetAction"-->
-<!--                text="create provider sets"-->
-<!--                id="RunCreateProviderSetAction"/>-->
         <action class="com.github.suhli.ideagokartosplugin.wire.CreateWireAction"
-                text="create wire.go"
                 id="RunCreateWireAction"/>
     </actions>
 </idea-plugin>

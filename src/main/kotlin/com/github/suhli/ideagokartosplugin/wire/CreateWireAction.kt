@@ -1,6 +1,6 @@
 package com.github.suhli.ideagokartosplugin.wire
 
-import com.github.suhli.ideagokartosplugin.ProviderHelper
+import com.github.suhli.ideagokartosplugin.WireHelper
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.DumbAwareAction
@@ -16,7 +16,7 @@ class CreateWireAction : DumbAwareAction(){
     override fun actionPerformed(e: AnActionEvent) {
         val file: PsiFile = e.getData(CommonDataKeys.PSI_FILE) ?: return
         val dir = file.containingDirectory
-        ProviderHelper.createWire(dir)
+        WireHelper.createWire(dir)
     }
 
 }
