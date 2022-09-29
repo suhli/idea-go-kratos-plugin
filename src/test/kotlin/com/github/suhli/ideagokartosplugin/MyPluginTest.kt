@@ -1,4 +1,4 @@
-package com.github.suhli.ideaplugingodemo
+package com.github.suhli.ideagokartosplugin
 
 import com.intellij.ide.highlighter.XmlFileType
 import com.intellij.psi.xml.XmlFile
