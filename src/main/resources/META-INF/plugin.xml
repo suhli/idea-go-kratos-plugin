@@ -1,20 +1,43 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.suhli.ideagokartosplugin</id>
-    <name>go-kartos-plugin</name>
+    <id>com.github.suhli.ideagokratosplugin</id>
+    <name>Go Kratos</name>
     <vendor>suhli</vendor>
-    <resource-bundle>messages.GoPluginDemoBundle</resource-bundle>
+    <resource-bundle>messages.GoPluginKratos</resource-bundle>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.go</depends>
     <depends>org.jetbrains.plugins.go</depends>
     <depends>org.jetbrains.plugins.terminal</depends>
+    <depends>idea.plugin.protoeditor</depends>
     <extensions defaultExtensionNs="com.intellij">
+        <fileType name="kratos"
+                  extensions="kratos"
+                  implementationClass="com.github.suhli.ideagokratosplugin.KratosConfigFileType" fieldName="INSTANCE"/>
         <runLineMarkerContributor language=""
-                                  implementationClass="com.github.suhli.ideagokartosplugin.wire.CreateWireCommentMarkerContributor"/>
+                                  implementationClass="com.github.suhli.ideagokratosplugin.KratosRunCommentMarkerContributor"/>
     </extensions>
     <actions>
-        <action class="com.github.suhli.ideagokartosplugin.wire.CreateWireAction"
-                id="RunCreateWireAction"/>
+        <action class="com.github.suhli.ideagokratosplugin.wire.KratosCreateWireAction"
+                id="com.github.suhli.ideagokratosplugin.KratosCreateWireAction"/>
+        <action class="com.github.suhli.ideagokratosplugin.wire.KratosWireAllAction"
+                id="com.github.suhli.ideagokratosplugin.KratosWireAllAction"/>
+        <action class="com.github.suhli.ideagokratosplugin.pb.KratosPbClientAction"
+                id="com.github.suhli.ideagokratosplugin.KratosPbClientAction"/>
+        <action class="com.github.suhli.ideagokratosplugin.pb.KratosPbAction"
+                id="com.github.suhli.ideagokratosplugin.KratosPbAction"/>
+
+        <group
+            id="com.github.suhli.ideagokratosplugin.actions"
+            text="Kratos Actions"
+        >
+            <action class="com.github.suhli.ideagokratosplugin.KratosAllAction"
+                    id="com.github.suhli.ideagokratosplugin.KratosPbAllAction"
+                    icon="com.goide.GoGeneratedIcons.GO"
+                    text="Kratos All"
+            />
+            <add-to-group group-id="ToolbarRunGroup"/>
+        </group>
+
     </actions>
 </idea-plugin>

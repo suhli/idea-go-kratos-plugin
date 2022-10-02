@@ -1,19 +1,17 @@
-package com.github.suhli.ideagokartosplugin.extends
+package com.github.suhli.ideagokratosplugin.extends
 
-class WireConfig {
-    public var location = ""
-    public var additionalDir = ""
-
+class KratosConfig {
+    public var wireLocation = ""
     companion object {
-        fun fromLines(lines:List<String>): WireConfig {
-            val config = WireConfig()
+        fun fromLines(lines:List<String>): KratosConfig {
+            val config = KratosConfig()
             for(line in lines){
                 if(!line.contains("=")){
                     continue
                 }
                 val (k,v) = line.split("=")
                 try {
-                    val field = WireConfig::class.java.getDeclaredField(k)
+                    val field = KratosConfig::class.java.getDeclaredField(k)
                     field.trySetAccessible()
                     field.set(config,v)
                 }catch (e:Exception){

@@ -1,5 +1,5 @@
 <!-- Plugin description -->
-# idea-kartos-plugin
+# idea-kratos-plugin
 
 idea奎托斯插件
 

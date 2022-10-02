@@ -1,6 +1,5 @@
-package com.github.suhli.ideagokartosplugin.extends
+package com.github.suhli.ideagokratosplugin.extends
 
-import com.github.suhli.ideagokartosplugin.WireHelper
 import com.intellij.psi.PsiFile
 
 

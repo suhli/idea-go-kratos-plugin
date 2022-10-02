@@ -1,9 +1,9 @@
-package com.github.suhli.ideagokartosplugin
+package com.github.suhli.ideagokratosplugin
 
-import com.github.suhli.ideagokartosplugin.extends.Provider
-import com.github.suhli.ideagokartosplugin.extends.ProviderSet
-import com.github.suhli.ideagokartosplugin.extends.ProviderType
-import com.github.suhli.ideagokartosplugin.extends.WireConfig
+import com.github.suhli.ideagokratosplugin.extends.KratosConfig
+import com.github.suhli.ideagokratosplugin.extends.Provider
+import com.github.suhli.ideagokratosplugin.extends.ProviderSet
+import com.github.suhli.ideagokratosplugin.extends.ProviderType
 import com.goide.GoFileType
 import com.goide.formatter.GoFormatterUtil
 import com.goide.psi.GoFile
@@ -11,14 +11,10 @@ import com.goide.psi.GoFunctionDeclaration
 import com.goide.psi.GoType
 import com.goide.psi.impl.GoPackage
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.wm.ToolWindow
-import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.PsiComment
-import com.intellij.psi.PsiDirectory
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiFileFactory
-import org.jetbrains.plugins.terminal.TerminalToolWindowFactory
-import org.jetbrains.plugins.terminal.TerminalView
+import com.intellij.openapi.project.Project
+import com.intellij.psi.*
+import com.intellij.psi.search.FileTypeIndex
+import com.intellij.psi.search.GlobalSearchScope
 
 
 class WireHelper {
@@ -36,7 +32,7 @@ class WireHelper {
             val arguments = arrayListOf<ProviderType>()
             val provides = hashSetOf<String>()
             for (providerSet in providerSets) {
-                provides.addAll(providerSet.returns.map { v->v.identifier })
+                provides.addAll(providerSet.returns.map { v -> v.identifier })
                 arguments.addAll(providerSet.arguments)
             }
             val notExistsArguments = hashSetOf<ProviderType>()
@@ -49,14 +45,30 @@ class WireHelper {
             return notExistsArguments
         }
 
-        private fun packageToImport(v:GoPackage): String {
+        private fun packageToImport(v: GoPackage): String {
             return """"${v.getImportPath(false)}""""
         }
 
-        fun createWire(dir: PsiDirectory,config:WireConfig) {
+        fun all(p: Project) {
+            val files = FileTypeIndex.getFiles(KratosConfigFileType.INSTANCE, GlobalSearchScope.projectScope(p))
+            val manager = PsiManager.getInstance(p)
+            for (file in files) {
+                val psi = manager.findFile(file) ?: continue
+                println("run wire:${psi.name}")
+                WireHelper.createWireByConfigFile(psi)
+            }
+        }
+
+        fun createWireByConfigFile(file: PsiFile) {
+            val dir = file.containingDirectory
+            createWire(dir, KratosConfig.fromLines(file.text.split("\n")))
+        }
+
+        private fun createWire(dir: PsiDirectory, config: KratosConfig) {
+            val project = dir.project
             var targetDir = dir
-            if(config.location.isNotEmpty()){
-                targetDir = DirHelper.cd(dir,config.location) ?: throw RuntimeException("no such dir")
+            if (config.wireLocation.isNotEmpty()) {
+                targetDir = DirHelper.cd(dir, config.wireLocation) ?: throw RuntimeException("no such dir")
             }
             val providerSets = collectProviderSets(dir)
             val applicationManager = ApplicationManager.getApplication()
@@ -73,7 +85,7 @@ class WireHelper {
                         "github.com/google/wire"
                     )
                     
-                    //kartos plugin generate
+                    //kratos plugin generate
                     var ${providerSet.name} = wire.NewSet($providerTokens)
                 """.trimIndent()
                 val providerSetFile =
@@ -89,14 +101,13 @@ class WireHelper {
             val injections = providerSets.joinToString(",") { v -> """${v.pkg.name}.${v.name}""" }
             val notExistRequirementsImports = arrayListOf<String>()
             val notExistsRequirementDeclarations = arrayListOf<String>()
-            for(notExists in notExistRequirements){
+
+            for (notExists in notExistRequirements) {
                 notExistRequirementsImports.add(packageToImport(notExists.pkg))
                 notExistsRequirementDeclarations.add(notExists.type.text)
             }
+            var comment = arrayListOf("//go:build wireinject","// +build wireinject").joinToString("\n") + "\n"
             val plainWire = """
-               //go:build wireinject  
-               
-
                // The build tag makes sure the stub is not built in the final build.
                package main
                import (
@@ -134,22 +145,22 @@ class WireHelper {
                }
                
                // wireApp init kratos application.
-               func wireApp(${notExistsRequirementDeclarations.joinToString(",")}) (*kratos.App, func(), error){
+               func wireApp(${notExistsRequirementDeclarations.sorted().joinToString(",")}) (*kratos.App, func(), error){
                     panic(wire.Build($injections, newApp))
                }
             """.trimIndent()
-            val wireFileName = "wire.gen.go"
-            val wireFile =
+            val wireFileName = "wire.go"
+            val content =
                 PsiFileFactory.getInstance(targetDir.project)
                     .createFileFromText(wireFileName, GoFileType.INSTANCE, plainWire)
-            GoFormatterUtil.reformat(wireFile)
-            val cmd = "cd ${targetDir.virtualFile.canonicalPath} && wire"
+
+            GoFormatterUtil.reformat(content)
+            val wireFile = PsiFileFactory.getInstance(targetDir.project).createFileFromText(wireFileName, GoFileType.INSTANCE, comment + content.text)
+            val cmd = "wire ${targetDir.virtualFile.canonicalPath}"
             applicationManager.runWriteAction {
                 targetDir.files.find { v -> v.name == wireFileName }?.delete()
                 targetDir.add(wireFile)
-                println(cmd)
-                val terminalView: TerminalView = TerminalView.getInstance(targetDir.project)
-                terminalView.createLocalShellWidget(null,"wire").executeCommand(cmd)
+                CmdHelper.getInstance(project).add(cmd)
             }
         }
 

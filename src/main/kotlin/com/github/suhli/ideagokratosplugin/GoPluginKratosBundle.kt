@@ -1,13 +1,13 @@
-package com.github.suhli.ideagokartosplugin
+package com.github.suhli.ideagokratosplugin
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
 @NonNls
-private const val BUNDLE = "messages.GoPluginDemoBundle"
+private const val BUNDLE = "messages.GoPluginKratos"
 
-object GoPluginDemoBundle : DynamicBundle(BUNDLE) {
+object GoPluginKratosBundle : DynamicBundle(BUNDLE) {
 
     @Suppress("SpreadOperator")
     @JvmStatic
