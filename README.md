@@ -18,7 +18,7 @@ idea奎托斯插件
 * 在目录下新建.kratos文件
 * 点击.kratos文件的运行符号即可生成provider set和wire.go
 
-.wire配置项:  
+.kratos配置项:  
 
 | key          | value | desc |
 |--------------| ---- | ---- |
