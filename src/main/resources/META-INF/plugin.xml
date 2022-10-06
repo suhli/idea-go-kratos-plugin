@@ -12,6 +12,9 @@
     <depends>idea.plugin.protoeditor</depends>
     <depends>com.jetbrains.restClient</depends>
     <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="com.github.suhli.ideagokratosplugin"
+                           displayType="BALLOON"
+                           key="com.github.suhli.ideagokratosplugin.notificationGroup"/>
         <defaultLiveTemplates file="templates.xml"/>
         <fileType name="kratos"
                   extensions="kratos"

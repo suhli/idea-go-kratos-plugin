@@ -18,6 +18,6 @@ class KratosPbClientAction : DumbAwareAction("Run Kratos Client") {
         val file: PsiFile = e.getData(CommonDataKeys.PSI_FILE) ?: return
         val task = genClientTask(file) ?: return
         val project = e.project ?: return
-        runKratosTaskInBackground("Generate Kratos Client", project, arrayListOf(task))
+        runKratosTaskInBackground("generate kratos clients", project, arrayListOf(task))
     }
 }

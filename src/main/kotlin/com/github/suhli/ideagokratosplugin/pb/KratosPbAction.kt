@@ -18,6 +18,6 @@ class KratosPbAction : DumbAwareAction("Run Kratos Config") {
         val file: PsiFile = e.getData(CommonDataKeys.PSI_FILE) ?: return
         val task = genPbTask(file) ?: return
         val project = e.project ?: return
-        runKratosTaskInBackground("Generate Proto Buffer", project, arrayListOf(task))
+        runKratosTaskInBackground("generate proto buffer", project, arrayListOf(task))
     }
 }

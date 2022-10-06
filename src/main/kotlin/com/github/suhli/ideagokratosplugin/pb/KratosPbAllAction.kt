@@ -18,6 +18,6 @@ class KratosPbAllAction : DumbAwareAction("Run Kratos Pb All") {
         if (tasks.isEmpty()) {
             return
         }
-        runKratosTaskInBackground("Generate All Proto Buffer", project, tasks)
+        runKratosTaskInBackground("generate proto buffer and clients", project, tasks)
     }
 }
