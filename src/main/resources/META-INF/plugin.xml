@@ -33,7 +33,16 @@
                 id="com.github.suhli.ideagokratosplugin.KratosPbClientAction"/>
         <action class="com.github.suhli.ideagokratosplugin.pb.KratosPbAction"
                 id="com.github.suhli.ideagokratosplugin.KratosPbAction"/>
-
+        <group
+                id="com.github.suhli.ideagokratosplugin.menuActions"
+                text="Kratos"
+        >
+            <separator/>
+            <action class="com.github.suhli.ideagokratosplugin.template.NewApiAction"/>
+            <action class="com.github.suhli.ideagokratosplugin.template.NewServiceAction"/>
+            <action class="com.github.suhli.ideagokratosplugin.template.NewProjectNoModAction"/>
+            <add-to-group group-id="NewGroup"/>
+        </group>
         <group
             id="com.github.suhli.ideagokratosplugin.actions"
             text="Kratos Actions"

@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger
 
 class KratosConfig {
     public var wireLocation = ""
+    public var layoutRepository = ""
 
     companion object {
         private val LOG = Logger.getInstance(KratosConfig::class.java)
