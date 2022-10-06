@@ -1,21 +1,23 @@
 package com.github.suhli.ideagokratosplugin.pb
 
-import com.github.suhli.ideagokratosplugin.PbHelper
+import com.github.suhli.ideagokratosplugin.helper.genAllPb
+import com.github.suhli.ideagokratosplugin.helper.runKratosTaskInBackground
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.progress.runBackgroundableTask
 import com.intellij.openapi.project.DumbAwareAction
-import com.intellij.protobuf.lang.PbFileType
-import com.intellij.psi.PsiComment
-import com.intellij.psi.PsiManager
-import com.intellij.psi.search.FileTypeIndex
-import com.intellij.psi.search.GlobalSearchScope
 
 class KratosPbAllAction : DumbAwareAction("Run Kratos Pb All") {
 
-    companion object{
+    companion object {
         val ID = "com.github.suhli.ideagokratosplugin.KratosPbAllAction"
     }
 
     override fun actionPerformed(e: AnActionEvent) {
-        PbHelper.all(e.project ?: return)
+        val project = e.project ?: return
+        val tasks = genAllPb(project)
+        if (tasks.isEmpty()) {
+            return
+        }
+        runKratosTaskInBackground("Generate All Proto Buffer", project, tasks)
     }
 }

@@ -1,19 +1,23 @@
 package com.github.suhli.ideagokratosplugin.pb
 
-import com.github.suhli.ideagokratosplugin.PbHelper
+import com.github.suhli.ideagokratosplugin.helper.genClientTask
+import com.github.suhli.ideagokratosplugin.helper.runKratosTaskInBackground
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.progress.runBackgroundableTask
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.psi.PsiFile
-import org.jetbrains.plugins.terminal.TerminalView
 
 class KratosPbClientAction : DumbAwareAction("Run Kratos Client") {
-    companion object{
+    companion object {
         const val ID = "com.github.suhli.ideagokratosplugin.KratosPbClientAction"
         const val TOKEN = "kratos:client"
     }
+
     override fun actionPerformed(e: AnActionEvent) {
         val file: PsiFile = e.getData(CommonDataKeys.PSI_FILE) ?: return
-        PbHelper.runClient(file)
+        val task = genClientTask(file) ?: return
+        val project = e.project ?: return
+        runKratosTaskInBackground("Generate Kratos Client", project, arrayListOf(task))
     }
 }

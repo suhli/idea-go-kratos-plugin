@@ -1,4 +1,4 @@
-package com.github.suhli.ideagokratosplugin
+package com.github.suhli.ideagokratosplugin.helper
 
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileSystemItem

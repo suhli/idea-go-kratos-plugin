@@ -1,0 +1,21 @@
+<templateSet group="Kratos">
+    <template name="http" value="{&#10;    option  (google.api.http) = {&#10;      $METHOD$: &quot;$PATH$&quot;&#10;      $OPTIONS$&#10;    };&#10;  };" description="http options" toReformat="false" toShortenFQNames="true">
+        <variable name="METHOD" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="PATH" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="OPTIONS" expression="" defaultValue="" alwaysStopAt="false" />
+        <context>
+            <option name="PROTO_SERVICE" value="true" />
+        </context>
+    </template>
+    <template name="property"
+              value="[(openapi.v3.property) = {&#10;title: &quot;$TITLE$&quot;,&#10;description: &quot;$DESC$&quot;,&#10;format: &quot;$FORMAT$&quot;&#10;}]"
+              description="openapi property"
+              toReformat="true" toShortenFQNames="true">
+        <variable name="TITLE" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="DESC" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="FORMAT" expression="" defaultValue="" alwaysStopAt="false" />
+        <context>
+            <option name="PROTO_MESSAGE" value="true" />
+        </context>
+    </template>
+</templateSet>

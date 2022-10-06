@@ -10,12 +10,16 @@
     <depends>org.jetbrains.plugins.go</depends>
     <depends>org.jetbrains.plugins.terminal</depends>
     <depends>idea.plugin.protoeditor</depends>
+    <depends>com.jetbrains.restClient</depends>
     <extensions defaultExtensionNs="com.intellij">
+        <defaultLiveTemplates file="templates.xml"/>
         <fileType name="kratos"
                   extensions="kratos"
                   implementationClass="com.github.suhli.ideagokratosplugin.KratosConfigFileType" fieldName="INSTANCE"/>
         <runLineMarkerContributor language=""
                                   implementationClass="com.github.suhli.ideagokratosplugin.KratosRunCommentMarkerContributor"/>
+        <codeInsight.lineMarkerProvider language="protobuf"
+                                        implementationClass="com.github.suhli.ideagokratosplugin.marker.RunGrpcMarkerProvider"/>
     </extensions>
     <actions>
         <action class="com.github.suhli.ideagokratosplugin.wire.KratosCreateWireAction"

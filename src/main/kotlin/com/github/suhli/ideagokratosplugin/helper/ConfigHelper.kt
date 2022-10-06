@@ -1,7 +1,7 @@
-package com.github.suhli.ideagokratosplugin
+package com.github.suhli.ideagokratosplugin.helper
 
+import com.github.suhli.ideagokratosplugin.KratosConfigFileType
 import com.github.suhli.ideagokratosplugin.extends.KratosConfig
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex

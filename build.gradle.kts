@@ -1,4 +1,5 @@
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -17,7 +18,7 @@ plugins {
 
 group = properties("pluginGroup")
 version = properties("pluginVersion")
-
+val compileKotlin: KotlinCompile by tasks
 // Configure project's dependencies
 repositories {
     mavenCentral()
@@ -30,6 +31,11 @@ kotlin {
         languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
+
+compileKotlin.kotlinOptions {
+    jvmTarget = JavaVersion.VERSION_11.majorVersion
+}
+
 
 // Configure Gradle IntelliJ Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {

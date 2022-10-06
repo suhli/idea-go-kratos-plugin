@@ -1,14 +1,14 @@
 package com.github.suhli.ideagokratosplugin.extends
 
+import com.goide.GoFileType
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiFileFactory
 
 
 class ProviderSet(val providers: ArrayList<Provider>) {
     val pkg = providers.first().pkg
     val goPkg = providers.first().goPkg
     val name =  """${pkg.name?.replaceFirstChar { v -> v.uppercaseChar() }}ProviderSets"""
-    var file: PsiFile? = null
-
     val arguments: List<ProviderType>
     val returns: List<ProviderType>
 
@@ -19,5 +19,26 @@ class ProviderSet(val providers: ArrayList<Provider>) {
             arguments.addAll(provider.arguments)
             returns.addAll(provider.returns)
         }
+    }
+
+    private val providerTokens = providers.map { v ->
+        v.name
+    }.joinToString(",")
+    val fileName = "${pkg.name}.set_gen.go"
+    private val plainProviderSet: String
+        get() {
+            return arrayListOf(
+                "package ${pkg.name}",
+                "import  \"github.com/google/wire\"",
+                "",
+                "//kratos plugin generate",
+                "var ${name} = wire.NewSet($providerTokens)"
+            )
+                .joinToString("\n")
+        }
+    val parent = pkg.containingFile.containingDirectory
+    fun buildFile(): PsiFile {
+        return PsiFileFactory.getInstance(parent.project)
+            .createFileFromText(fileName, GoFileType.INSTANCE, plainProviderSet)
     }
 }
