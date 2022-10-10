@@ -26,7 +26,7 @@ private fun findDependency(file: PsiFile): List<String> {
     return comments.map { v ->
         val text = v.text
         val match = Regex("depends:(.+)").find(text)
-        val path = match?.groupValues?.find { v -> !v.contains("depends") } ?: ""
+        val path = match?.groupValues?.find { m -> !m.contains("depends") } ?: ""
         if (path.isNotEmpty()) "--proto_path=${path}" else ""
     }.filter { v -> v.isNotEmpty() }
 }

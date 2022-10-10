@@ -24,7 +24,7 @@ fun createRpcInRestClient(element:PsiElement){
         val body = "{\n" + fields.joinToString(",\n") { v -> v.toJson() } + "\n}\n"
         val fileName = PathUtil.makeFileName("kratos-api", HttpRequestFileType.INSTANCE.defaultExtension)
         val fileService = ScratchFileService.getInstance()
-        var file: VirtualFile? = null
+        var file: VirtualFile?
         try {
             file = fileService.findFile(
                 ScratchRootType.getInstance(),

@@ -160,13 +160,12 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
                }
             """.trimIndent()
     val wireFileName = "wire.go"
-    val content =
+    val wireFile =
         PsiFileFactory.getInstance(targetDir.project)
             .createFileFromText(wireFileName, GoFileType.INSTANCE, plainWire)
-
-    GoFormatterUtil.reformat(content)
-    val wireFile = PsiFileFactory.getInstance(targetDir.project)
-        .createFileFromText(wireFileName, GoFileType.INSTANCE, comment + content.text)
+    GoFormatterUtil.reformat(wireFile)
+    val documentManager = PsiDocumentManager.getInstance(project)
+    val doc = documentManager.getDocument(wireFile)!!
     val exe = GoSdkUtil.findExecutableInGoPath("wire", dir.project, null) ?: return null
     val cmd = GeneralCommandLine(exe.path, targetDir.virtualFile.canonicalPath)
         .withCharset(Charset.forName("UTF-8"))
@@ -181,6 +180,8 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
         }, "Generate Provider Set${providerSet.fileName}", true)
     })
     tasks.add(KratosTask({
+        doc.insertString(0, comment)
+        documentManager.commitDocument(doc)
         targetDir.files.find { v -> v.name == wireFileName }?.delete()
         targetDir.add(wireFile)
 
