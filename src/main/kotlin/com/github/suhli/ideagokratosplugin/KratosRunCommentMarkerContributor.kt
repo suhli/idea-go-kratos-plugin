@@ -3,6 +3,7 @@ package com.github.suhli.ideagokratosplugin
 import com.github.suhli.ideagokratosplugin.pb.KratosPbClientAction
 import com.github.suhli.ideagokratosplugin.pb.KratosPbAction
 import com.github.suhli.ideagokratosplugin.wire.KratosCreateWireAction
+import com.goide.GoFileType
 import com.intellij.execution.lineMarker.RunLineMarkerContributor
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionManager

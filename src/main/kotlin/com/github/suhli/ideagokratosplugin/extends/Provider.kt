@@ -1,9 +1,6 @@
 package com.github.suhli.ideagokratosplugin.extends
 
-import com.goide.psi.GoFunctionDeclaration
-import com.goide.psi.GoPackageClause
-import com.goide.psi.GoParameterDeclaration
-import com.goide.psi.GoType
+import com.goide.psi.*
 import com.goide.psi.impl.GoPackage
 import com.goide.sdk.GoPackageUtil
 import com.intellij.psi.ResolveState
@@ -51,8 +48,14 @@ class Provider(val declaration: GoFunctionDeclaration) {
         get() {
             val list = arrayListOf<ProviderType>()
             val returns = declaration.resultType
-            val type = goTypeToProviderType(returns) ?: return list
-            list.add(type)
+            if(returns is GoTypeList){
+                for(type in returns.typeList){
+                    list.add(goTypeToProviderType(type) ?: continue)
+                }
+            }else{
+                val type = goTypeToProviderType(returns) ?: return list
+                list.add(type)
+            }
             return list
         }
 

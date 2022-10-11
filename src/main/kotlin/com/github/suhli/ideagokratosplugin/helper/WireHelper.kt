@@ -6,6 +6,7 @@ import com.goide.GoFileType
 import com.goide.formatter.GoFormatterUtil
 import com.goide.psi.GoFile
 import com.goide.psi.GoFunctionDeclaration
+import com.goide.psi.GoPointerType
 import com.goide.psi.GoType
 import com.goide.psi.impl.GoPackage
 import com.goide.sdk.GoSdkUtil
@@ -101,7 +102,11 @@ fun genWire(file: PsiFile): List<KratosTask>? {
 }
 
 private fun packageToImport(v: GoPackage): String {
-    return """"${v.getImportPath(false)}""""
+    return toImport(v.getImportPath(false)!!)
+}
+
+private fun toImport(v:String): String {
+    return """"$v""""
 }
 
 
@@ -114,28 +119,39 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
     }
     val providerSets = collectProviderSets(dir)
     val notExistRequirements = scanForNotProvideTypes(providerSets)
-    val injectionImports = providerSets.joinToString("\n") { v -> packageToImport(v.goPkg) }
+    val injectionImports = providerSets.map{ v -> packageToImport(v.goPkg) }
     val injections = providerSets.joinToString(",") { v -> """${v.pkg.name}.${v.name}""" }
-    val notExistRequirementsImports = arrayListOf<String>()
-    val notExistsRequirementDeclarations = arrayListOf<String>()
+    val notExistRequirementsImports = hashSetOf<String>()
+    val notExistsRequirementDeclarations = hashSetOf<String>()
 
     for (notExists in notExistRequirements) {
         notExistRequirementsImports.add(packageToImport(notExists.pkg))
-        notExistsRequirementDeclarations.add(notExists.type.text)
+        var declaration = notExists.type.text
+        if(!declaration.contains(".")) {
+            if(notExists.type is GoPointerType){
+                declaration  = "*${notExists.pkg.name}.${declaration.replace("*","")}"
+            }else{
+                declaration  = "${notExists.pkg.name}.${declaration}"
+            }
+
+        }
+        notExistsRequirementDeclarations.add(declaration)
     }
+    val imports = hashSetOf<String>()
+    imports.addAll(injectionImports)
+    imports.addAll(notExistRequirementsImports)
+    imports.add(toImport("github.com/google/wire"))
+    imports.add(toImport("github.com/go-kratos/kratos/v2"))
+    imports.add(toImport("os"))
+    imports.add(toImport("github.com/go-kratos/kratos/v2/transport/grpc"))
+    imports.add(toImport( "github.com/go-kratos/kratos/v2/transport/http"))
+
     val comment = arrayListOf("//go:build wireinject", "// +build wireinject").joinToString("\n") + "\n"
     val plainWire = """
                // The build tag makes sure the stub is not built in the final build.
                package main
                import (
-                    ${notExistRequirementsImports.joinToString("\n")}
-                    $injectionImports
-                    "github.com/google/wire"
-                    "github.com/go-kratos/kratos/v2"
-                    "os"
-                    "github.com/go-kratos/kratos/v2/transport/grpc"
-                    "github.com/go-kratos/kratos/v2/transport/http"
-                    
+                    ${imports.sorted().joinToString("\n")}
                )
                
                var (
