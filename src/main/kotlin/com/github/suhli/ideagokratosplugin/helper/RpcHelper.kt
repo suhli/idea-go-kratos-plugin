@@ -43,8 +43,8 @@ fun createRpcInRestClient(element:PsiElement){
         val editorManager = FileEditorManager.getInstance(project)
         editorManager.openFile(file, true)
         val request = "\n" + """
-                    ### ${pkg}.${svc.name}.${element.name}
-                    GRPC localhost:9000/$pkg.${element.name}/$method
+                    ### ${pkg}.${svc.name}
+                    GRPC localhost:9000/$pkg.${svc.name}/$method
                 """.trimIndent() + "\n\n" + body
         applicationManager.runWriteAction {
             doc.insertString(doc.textLength, request)
