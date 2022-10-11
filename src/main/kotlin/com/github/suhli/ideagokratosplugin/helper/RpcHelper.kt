@@ -7,6 +7,7 @@ import com.intellij.ide.scratch.ScratchRootType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.protobuf.lang.psi.PbServiceDefinition
 import com.intellij.protobuf.lang.psi.PbServiceMethod
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
@@ -19,6 +20,7 @@ fun createRpcInRestClient(element:PsiElement){
         val fields = KratosRpcField.getFieldsInMessageTypeName(arg)
         val project = element.project
         val method = element.nameIdentifier?.text ?: return
+        val svc = element.parent.parent as PbServiceDefinition
         val pkg = element.pbFile.packageStatement!!.packageName!!.text
 
         val body = "{\n" + fields.joinToString(",\n") { v -> v.toJson() } + "\n}\n"
@@ -41,7 +43,7 @@ fun createRpcInRestClient(element:PsiElement){
         val editorManager = FileEditorManager.getInstance(project)
         editorManager.openFile(file, true)
         val request = "\n" + """
-                    ### ${pkg}.${element.name}.${element.name}
+                    ### ${pkg}.${svc.name}.${element.name}
                     GRPC localhost:9000/$pkg.${element.name}/$method
                 """.trimIndent() + "\n\n" + body
         applicationManager.runWriteAction {
