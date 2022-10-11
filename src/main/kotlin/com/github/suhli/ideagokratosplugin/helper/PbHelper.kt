@@ -17,7 +17,13 @@ import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import java.nio.charset.Charset
-
+private var LOG:Logger? = null
+private fun getLogger(): Logger {
+    if(LOG == null){
+        LOG = Logger.getInstance("PbHelper")
+    }
+    return LOG!!
+}
 private fun findDependency(file: PsiFile): List<String> {
     if (file !is PbFile) {
         return arrayListOf<String>()
@@ -40,14 +46,17 @@ fun genPbTask(file: PsiFile): KratosTask? {
     val otherPaths = findDependency(file)
     val cmds = arrayListOf("protoc")
     cmds.addAll(otherPaths)
-    cmds.add("--go_out=paths=source_relative:./$parentPath")
-    cmds.add("./$parentPath/*.proto")
+    cmds.add("--proto_path=${project.basePath}/$parentPath")
+    cmds.add("--go_out=paths=source_relative:${project.basePath}/$parentPath")
+    cmds.add("${project.basePath}/$parentPath/${file.name}")
     val cmd = GeneralCommandLine(cmds)
         .withCharset(Charset.forName("UTF-8"))
         .withWorkDirectory(project.basePath)
     return KratosTask(
         {
-            ExecUtil.execAndGetOutput(cmd)
+            getLogger().debug("will run pb command:${cmd.commandLineString}")
+            val output = ExecUtil.execAndGetOutput(cmd)
+            getLogger().debug("pb command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
         },
         "Generate Client Task"
     )
@@ -62,7 +71,9 @@ fun genClientTask(file: PsiFile): KratosTask? {
         .withWorkDirectory(project.basePath)
     return KratosTask(
         {
-            ExecUtil.execAndGetOutput(cmd)
+            getLogger().debug("will run client command:${cmd.commandLineString}")
+            val output = ExecUtil.execAndGetOutput(cmd)
+            getLogger().debug("client command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
         },
         "Generate Client Task"
     )
@@ -77,12 +88,13 @@ fun genAllPb(p: Project): List<KratosTask> {
         val clientPbComment =
             file.children.find { v -> v is PsiComment && v.text.contains(KratosPbClientAction.TOKEN) }
         if (clientPbComment != null) {
-            tasks.add(genPbTask(file) ?: continue)
-
+            getLogger().debug("find client comment:${file.virtualFile.path}")
+            tasks.add(genClientTask(file) ?: continue)
         }
         val pbComment = file.children.find { v -> v is PsiComment && v.text.contains(KratosPbAction.TOKEN) }
         if (pbComment != null) {
-            tasks.add(genClientTask(file) ?: continue)
+            getLogger().debug("find pb comment:${file.virtualFile.path}")
+            tasks.add(genPbTask(file) ?: continue)
         }
     }
     return tasks

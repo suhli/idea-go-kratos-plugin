@@ -21,31 +21,31 @@ idea奎托斯插件
 .kratos配置项:  
 
 | key          | value | desc |
-|--------------| ---- | ---- |
+|--------------| ---- | -- |
 | wireLocation | string | wire.go生成目录 |
+| layoutRepository | string | kratos cli -r参数 |
 
 example:
 ```properties
 wireLocation=cmd/post
+layoutRepository=https://gitee.com/go-kratos/kratos-layout.git
 ```
 
 ## 2. pb.go生成
 
 ## clients
 * 在pb文件添加注释//kratos:clients
-* 点击一键生成则会运行对应的kratos proto client
 
 ## pb
 * 在pb文件添加注释//kratos:pb
 * (optional) 添加注释depends如:
 > //depends:./third_party
-* 点击一键生成则会生成对应的pb.go
 
 ## 3. biz/service/data模板
 
 TODO
 
-## 4. 一键生成wire/provider set/pb.go
+## 4. 生成wire/provider set/pb.go
 
 点击run旁边的go logo会运行生成provider set/wire.go/kartos proto clients/pb.go
 

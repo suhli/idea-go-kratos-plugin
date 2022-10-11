@@ -19,7 +19,14 @@ import com.intellij.psi.search.GlobalSearchScope
 import java.nio.charset.Charset
 
 private const val TOKEN = "wired"
-private val LOG = Logger.getInstance("WireHelper")
+
+private var LOG:Logger? = null
+private fun getLogger(): Logger {
+    if(LOG == null){
+        LOG = Logger.getInstance("WireHelper")
+    }
+    return LOG!!
+}
 
 private fun scanForNotProvideTypes(providerSets: List<ProviderSet>): HashSet<ProviderType> {
     val arguments = arrayListOf<ProviderType>()
@@ -165,7 +172,7 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
             .createFileFromText(wireFileName, GoFileType.INSTANCE, plainWire)
     GoFormatterUtil.reformat(wireFile)
     val documentManager = PsiDocumentManager.getInstance(project)
-    val doc = documentManager.getDocument(wireFile)!!
+
     val exe = GoSdkUtil.findExecutableInGoPath("wire", dir.project, null) ?: return null
     val cmd = GeneralCommandLine(exe.path, targetDir.virtualFile.canonicalPath)
         .withCharset(Charset.forName("UTF-8"))
@@ -180,17 +187,18 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
         }, "Generate Provider Set${providerSet.fileName}", true)
     })
     tasks.add(KratosTask({
+        targetDir.files.find { v -> v.name == wireFileName }?.delete()
+        val file = targetDir.add(wireFile).containingFile
+        val doc = documentManager.getDocument(file)!!
         doc.insertString(0, comment)
         documentManager.commitDocument(doc)
-        targetDir.files.find { v -> v.name == wireFileName }?.delete()
-        targetDir.add(wireFile)
 
     }, "Generate Wire File", true))
     tasks.add(KratosTask({
-        LOG.debug("will run:${cmd.commandLineString}")
+        getLogger().info("will run:${cmd.commandLineString}")
         val result = ExecUtil.execAndGetOutput(cmd)
-        LOG.debug("wire command result:")
-        LOG.debug(result.stderr)
+        getLogger().info("wire command result:")
+        getLogger().info(result.stderr)
     }, "Wire Command"))
     return tasks
 }
