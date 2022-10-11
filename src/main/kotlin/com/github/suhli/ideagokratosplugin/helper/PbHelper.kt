@@ -54,9 +54,9 @@ fun genPbTask(file: PsiFile): KratosTask? {
         .withWorkDirectory(project.basePath)
     return KratosTask(
         {
-            getLogger().debug("will run pb command:${cmd.commandLineString}")
+            getLogger().info("will run pb command:${cmd.commandLineString}")
             val output = ExecUtil.execAndGetOutput(cmd)
-            getLogger().debug("pb command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
+            getLogger().info("pb command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
         },
         "Generate Client Task"
     )
@@ -71,9 +71,9 @@ fun genClientTask(file: PsiFile): KratosTask? {
         .withWorkDirectory(project.basePath)
     return KratosTask(
         {
-            getLogger().debug("will run client command:${cmd.commandLineString}")
+            getLogger().info("will run client command:${cmd.commandLineString}")
             val output = ExecUtil.execAndGetOutput(cmd)
-            getLogger().debug("client command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
+            getLogger().info("client command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
         },
         "Generate Client Task"
     )
@@ -88,12 +88,12 @@ fun genAllPb(p: Project): List<KratosTask> {
         val clientPbComment =
             file.children.find { v -> v is PsiComment && v.text.contains(KratosPbClientAction.TOKEN) }
         if (clientPbComment != null) {
-            getLogger().debug("find client comment:${file.virtualFile.path}")
+            getLogger().info("find client comment:${file.virtualFile.path}")
             tasks.add(genClientTask(file) ?: continue)
         }
         val pbComment = file.children.find { v -> v is PsiComment && v.text.contains(KratosPbAction.TOKEN) }
         if (pbComment != null) {
-            getLogger().debug("find pb comment:${file.virtualFile.path}")
+            getLogger().info("find pb comment:${file.virtualFile.path}")
             tasks.add(genPbTask(file) ?: continue)
         }
     }
