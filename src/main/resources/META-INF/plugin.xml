@@ -53,6 +53,7 @@
                     text="Kratos All"
             />
             <add-to-group group-id="ToolbarRunGroup"/>
+            <add-to-group group-id="ToolsMenu"/>
         </group>
 
     </actions>
