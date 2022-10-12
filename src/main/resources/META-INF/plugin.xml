@@ -3,6 +3,57 @@
     <id>com.github.suhli.ideagokratosplugin</id>
     <name>Go Kratos</name>
     <vendor>suhli</vendor>
+    <description><![CDATA[
+        <span>idea plugin for <a href="https://github.com/go-kratos/kratos">go-kratos</a></span>
+        <br>
+        <a href="https://github.com/suhli/idea-go-kratos-plugin/blob/main/docs/README.CN.md">中文</a>
+        <br>
+        <h1>Features</h1>
+        <ul>
+            <li>generate wire provider sets</li>
+            <li>generate wire.go file</li>
+            <li>kratos command integration</li>
+            <li>protoc command integration</li>
+        </ul>
+        <h1>Usage</h1>
+        <ul>
+        <li>
+            mark provider:
+            <br/>
+            <code>// wired</code>
+        </li>
+        <li>
+            mark client at proto:
+            <br/>
+            <code>
+                //kratos:client
+            </code>
+        </li>
+        <li>
+            mark pb file at proto:
+            <br/>
+            <code>
+                //kratos:pb
+                <br/>
+                //depends:./third_party
+            </code>
+        </li>
+        <li>
+            kratos config:
+            <br/>
+            <code>
+                #.kratos
+                <br/>
+                wireLocation=cmd/post #wire.go location
+                <br/>
+                layoutRepository=https://gitee.com/go-kratos/kratos-layout.git #optional
+            </code>
+        </li>
+        <li>
+            run action Kratos All will generate wire.go and referencing provider sets
+        </li>
+    </ul>
+    ]]></description>
     <resource-bundle>messages.GoPluginKratos</resource-bundle>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>

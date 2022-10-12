@@ -1,4 +1,3 @@
-<!-- Plugin description -->
 English | [中文](docs/README.CN.md)
 
 idea plugin for [go-kratos](https://github.com/go-kratos/kratos)
@@ -10,6 +9,5 @@ idea plugin for [go-kratos](https://github.com/go-kratos/kratos)
 * kratos command integration
 * protoc command integration
 
-<!-- Plugin description end -->
 
 
