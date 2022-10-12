@@ -2,7 +2,7 @@
 <idea-plugin>
     <id>com.github.suhli.ideagokratosplugin</id>
     <name>Go Kratos</name>
-    <vendor>suhli</vendor>
+    <vendor email="admin@shuhangli.com" url="https://github.com/suhli">suhli</vendor>
     <description><![CDATA[
         <span>idea plugin for <a href="https://github.com/go-kratos/kratos">go-kratos</a></span>
         <br>
@@ -53,6 +53,14 @@
             run action Kratos All will generate wire.go and referencing provider sets
         </li>
     </ul>
+    <div>
+        See Also:
+        <div><a href="https://github.com/go-kratos/kratos">https://github.com/go-kratos/kratos</a></div>
+         <div><a href="https://go-kratos.dev/">https://go-kratos.dev/</a></div>
+         <div><a href="https://go-kratos.dev/en/docs/guide/wire">https://go-kratos.dev/en/docs/guide/wire</a></div>
+         <div><a href="https://go-kratos.dev/en/docs/guide/api-protobuf">https://go-kratos.dev/en/docs/guide/api-protobuf</a></div>
+    </div>
+
     ]]></description>
     <resource-bundle>messages.GoPluginKratos</resource-bundle>
     <depends>com.intellij.modules.platform</depends>
