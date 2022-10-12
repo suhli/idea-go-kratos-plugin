@@ -19,7 +19,7 @@ import com.intellij.protobuf.lang.psi.PbFile
 import com.intellij.psi.PsiFile
 import java.nio.charset.Charset
 
-class NewServiceAction : DumbAwareAction("Kratos New Api") {
+class NewServiceAction : DumbAwareAction("Kratos New Service") {
     companion object {
         private val LOG = Logger.getInstance(NewServiceAction::class.java)
     }
