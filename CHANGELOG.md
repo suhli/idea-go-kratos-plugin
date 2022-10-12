@@ -4,8 +4,10 @@
 
 ## [Unreleased]
 
+## [0.0.3]
+update idea plugin marketplace readme
+
 ## [0.0.2]
-v0.0.2
 
 ## [0.0.1]
 ### Added
