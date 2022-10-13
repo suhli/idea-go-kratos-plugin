@@ -154,15 +154,6 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
                     ${imports.sorted().joinToString("\n")}
                )
                
-               var (
-               	// Name is the name of the compiled software.
-               	Name string
-               	// Version is the version of the compiled software.
-               	Version string
-
-               	id, _ = os.Hostname()
-               )
-               
                func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
                	return kratos.New(
                		kratos.ID(id),
