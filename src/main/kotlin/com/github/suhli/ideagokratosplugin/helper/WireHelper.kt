@@ -156,7 +156,7 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
                
                func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
                	return kratos.New(
-               		kratos.ID(id),
+               		kratos.ID(Id),
                		kratos.Name(Name),
                		kratos.Version(Version),
                		kratos.Metadata(map[string]string{}),
