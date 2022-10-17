@@ -94,7 +94,7 @@ fun genPbTask(file: PsiFile): KratosTask? {
     val parentPath = DirHelper.relativeToRoot(file.parent ?: return null) ?: return null
     val otherPaths = hashSetOf<String>()
     otherPaths.addAll(findDependency(file))
-    otherPaths.addAll(findModules(file))
+//    otherPaths.addAll(findModules(file))
 
     val cmds = arrayListOf("protoc")
     cmds.addAll(otherPaths)
@@ -115,10 +115,18 @@ fun genPbTask(file: PsiFile): KratosTask? {
 }
 
 fun genClientTask(file: PsiFile): KratosTask? {
-    val path = DirHelper.relativeToRoot(file) ?: return null
     val project = file.project
-    val exe = GoSdkUtil.findExecutableInGoPath("kratos", project, null) ?: return null
-    val cmd = GeneralCommandLine(exe.path, "proto", "client", path)
+    val parentPath = DirHelper.relativeToRoot(file.parent ?: return null) ?: return null
+    val otherPaths = hashSetOf<String>()
+    otherPaths.addAll(findDependency(file))
+    val cmds = arrayListOf("protoc")
+    cmds.addAll(otherPaths)
+    cmds.add("--proto_path=${project.basePath}/$parentPath")
+    cmds.add("--go_out=paths=source_relative:${project.basePath}/$parentPath")
+    cmds.add("${project.basePath}/$parentPath/${file.name}")
+    cmds.add("--go-http_out=paths=source_relative:${project.basePath}/$parentPath")
+    cmds.add("--go-grpc_out=paths=source_relative:${project.basePath}/$parentPath")
+    val cmd = GeneralCommandLine(cmds)
         .withCharset(Charset.forName("UTF-8"))
         .withWorkDirectory(project.basePath)
     return KratosTask(
