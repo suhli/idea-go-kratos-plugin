@@ -153,19 +153,6 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
                     ${imports.sorted().joinToString("\n")}
                )
                
-               func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
-               	return kratos.New(
-               		kratos.ID(Id),
-               		kratos.Name(Name),
-               		kratos.Version(Version),
-               		kratos.Metadata(map[string]string{}),
-               		kratos.Logger(logger),
-               		kratos.Server(
-               			gs,
-               			hs,
-               		),
-               	)
-               }
                
                // wireApp init kratos application.
                func wireApp(${notExistsRequirementDeclarations.sorted().joinToString(",")}) (*kratos.App, func(), error){
