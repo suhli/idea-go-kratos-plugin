@@ -142,8 +142,6 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
     imports.addAll(notExistRequirementsImports)
     imports.add(toImport("github.com/google/wire"))
     imports.add(toImport("github.com/go-kratos/kratos/v2"))
-    imports.add(toImport("github.com/go-kratos/kratos/v2/transport/grpc"))
-    imports.add(toImport( "github.com/go-kratos/kratos/v2/transport/http"))
 
     val comment = arrayListOf("//go:build wireinject", "// +build wireinject").joinToString("\n") + "\n"
     val plainWire = """
