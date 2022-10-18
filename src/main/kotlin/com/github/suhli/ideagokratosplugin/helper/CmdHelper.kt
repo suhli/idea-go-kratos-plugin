@@ -2,6 +2,7 @@ package com.github.suhli.ideagokratosplugin.helper
 
 import com.github.suhli.ideagokratosplugin.GoPluginKratosBundle
 import com.github.suhli.ideagokratosplugin.extends.KratosTask
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -35,5 +36,7 @@ fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<Kr
         if (editor != null) {
             Notifications.Bus.notify(Notification("com.github.suhli.ideagokratosplugin", "$taskName done!", NotificationType.INFORMATION), project)
         }
+        project.projectFile?.refresh(false,true)
+        DaemonCodeAnalyzer.getInstance(project).restart();
     }
 }
