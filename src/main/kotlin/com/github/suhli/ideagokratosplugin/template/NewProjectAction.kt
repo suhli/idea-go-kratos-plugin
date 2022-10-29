@@ -2,6 +2,7 @@ package com.github.suhli.ideagokratosplugin.template
 
 import com.github.suhli.ideagokratosplugin.InputTextDialog
 import com.github.suhli.ideagokratosplugin.extends.KratosTask
+import com.github.suhli.ideagokratosplugin.extends.KratosTaskResult
 import com.github.suhli.ideagokratosplugin.helper.ConfigHelper
 import com.github.suhli.ideagokratosplugin.helper.runKratosTaskInBackground
 import com.goide.sdk.GoSdkUtil
@@ -34,8 +35,12 @@ class NewProjectNoModAction : DumbAwareAction("Kratos New No Mod") {
                     .withWorkDirectory(project.basePath)
                 runKratosTaskInBackground("new kratos no mod", project, arrayListOf(KratosTask({
                     val output = ExecUtil.execAndGetOutput(cmd)
-                    LOG.debug("run command:${cmd.commandLineString}")
-                    LOG.debug(output.stderr)
+                    LOG.info("run command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
+                    if (output.exitCode != 0) {
+                        KratosTaskResult.error(RuntimeException(output.stderr))
+                    } else {
+                        KratosTaskResult.success()
+                    }
                 }, "new kratos no mod")))
             }
 

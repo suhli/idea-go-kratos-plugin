@@ -175,6 +175,7 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
             val parent = providerSet.parent
             parent.files.find { v -> v.name == providerSet.fileName }?.delete()
             parent.add(providerSet.buildFile())
+            KratosTaskResult.success()
         }, "Generate Provider Set${providerSet.fileName}", true)
     })
     tasks.add(KratosTask({
@@ -183,13 +184,17 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
         val doc = documentManager.getDocument(file)!!
         doc.insertString(0, comment)
         documentManager.commitDocument(doc)
-
+        KratosTaskResult.success()
     }, "Generate Wire File", true))
     tasks.add(KratosTask({
         getLogger().info("will run:${cmd.commandLineString}")
-        val result = ExecUtil.execAndGetOutput(cmd)
-        getLogger().info("wire command result:")
-        getLogger().info(result.stderr)
+        val output = ExecUtil.execAndGetOutput(cmd)
+        getLogger().info("wire command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
+        if (output.exitCode != 0) {
+            KratosTaskResult.error(RuntimeException(output.stderr))
+        } else {
+            KratosTaskResult.success()
+        }
     }, "Wire Command"))
     return tasks
 }
