@@ -12,6 +12,22 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.runBackgroundableTask
 import com.intellij.openapi.project.Project
 
+private fun errorAlert(project: Project, task: String, message: String?) {
+    Notifications.Bus.notify(
+        Notification(
+            "com.github.suhli.ideagokratosplugin",
+            "$task failed:\n${message ?: ""}",
+            NotificationType.ERROR
+        ), project
+    )
+}
+
+private fun runTask(project: Project, taskName: String, t: KratosTask) {
+    val result = t.runnable()
+    if (result?.exception != null) {
+        errorAlert(project, taskName, result.message)
+    }
+}
 
 fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<KratosTask>) {
     if (tasks.isEmpty()) {
@@ -19,24 +35,31 @@ fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<Kr
     }
     val editor = FileEditorManager.getInstance(project).selectedTextEditor
 
-
     runBackgroundableTask(taskName, project, true) {
         it.isIndeterminate = false
         val size = tasks.size
         it.fraction = 0.0
         for ((i, t) in tasks.withIndex()) {
             if (t.needWrite) {
-                WriteCommandAction.runWriteCommandAction(project, t.runnable)
+                WriteCommandAction.runWriteCommandAction(project) {
+                    runTask(project, taskName, t)
+                }
             } else {
-                t.runnable.run()
+                runTask(project, taskName, t)
             }
             it.fraction = ((i + 1) / size).toDouble()
         }
         it.fraction = 1.0
         if (editor != null) {
-            Notifications.Bus.notify(Notification("com.github.suhli.ideagokratosplugin", "$taskName done!", NotificationType.INFORMATION), project)
+            Notifications.Bus.notify(
+                Notification(
+                    "com.github.suhli.ideagokratosplugin",
+                    "$taskName done!",
+                    NotificationType.INFORMATION
+                ), project
+            )
         }
-        project.projectFile?.refresh(false,true)
+        project.projectFile?.refresh(false, true)
         DaemonCodeAnalyzer.getInstance(project).restart();
     }
 }
