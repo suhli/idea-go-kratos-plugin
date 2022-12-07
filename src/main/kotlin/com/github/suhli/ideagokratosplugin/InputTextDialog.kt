@@ -1,6 +1,5 @@
 package com.github.suhli.ideagokratosplugin
 
-import com.esotericsoftware.kryo.NotNull
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.dsl.builder.bindText
@@ -13,7 +12,7 @@ class InputTextDialog(
     private val name: String,
     private val fieldName: String,
     private val onApply:(String)->Unit,
-    @NotNull private val okText: String
+    private val okText: String
 ) :
     DialogWrapper(project, false) {
 
