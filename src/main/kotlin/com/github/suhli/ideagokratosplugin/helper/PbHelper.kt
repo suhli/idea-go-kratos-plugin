@@ -16,6 +16,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
+import java.io.File
 import java.nio.charset.Charset
 
 private var LOG: Logger? = null
@@ -36,8 +37,10 @@ private fun findDependency(file: PsiFile): HashSet<String> {
     for (comment in dependsComments) {
         val text = comment.text
         val match = Regex("depends:(.+)").find(text)
-        val path = match?.groupValues?.find { m -> !m.contains("depends") } ?: ""
+        var path = match?.groupValues?.find { m -> !m.contains("depends") } ?: ""
+
         if (path.isNotEmpty()) {
+            path = path.split("/").joinToString(File.separator)
             result.add("--proto_path=${path}")
         }
     }
@@ -54,9 +57,9 @@ fun genPbTask(file: PsiFile): KratosTask? {
     otherPaths.addAll(findDependency(file))
     val cmds = arrayListOf("protoc")
     cmds.addAll(otherPaths)
-    cmds.add("--proto_path=${project.basePath}/$parentPath")
-    cmds.add("--go_out=paths=source_relative:${project.basePath}/$parentPath")
-    cmds.add("${project.basePath}/$parentPath/${file.name}")
+    cmds.add("--proto_path=${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
+    cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
+    cmds.add(DirHelper.join(project.basePath!!,parentPath,file.name))
     val cmd = GeneralCommandLine(cmds)
         .withCharset(Charset.forName("UTF-8"))
         .withWorkDirectory(project.basePath)
@@ -82,11 +85,11 @@ fun genClientTask(file: PsiFile): KratosTask? {
     otherPaths.addAll(findDependency(file))
     val cmds = arrayListOf("protoc")
     cmds.addAll(otherPaths)
-    cmds.add("--proto_path=${project.basePath}/$parentPath")
-    cmds.add("--go_out=paths=source_relative:${project.basePath}/$parentPath")
-    cmds.add("--go-http_out=paths=source_relative:${project.basePath}/$parentPath")
-    cmds.add("--go-grpc_out=paths=source_relative:${project.basePath}/$parentPath")
-    cmds.add("${project.basePath}/$parentPath/${file.name}")
+    cmds.add("--proto_path=${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
+    cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
+    cmds.add("--go-http_out=paths=source_relative:${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
+    cmds.add("--go-grpc_out=paths=source_relative:${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
+    cmds.add(DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray(),file.name))
     val cmd = GeneralCommandLine(cmds)
         .withCharset(Charset.forName("UTF-8"))
         .withWorkDirectory(project.basePath)
