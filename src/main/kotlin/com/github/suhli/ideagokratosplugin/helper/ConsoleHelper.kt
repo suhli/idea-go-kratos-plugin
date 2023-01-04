@@ -82,6 +82,13 @@ public fun runAndLog(project: Project, cmds: List<String>){
 public fun runAndLog(project: Project, cmd: GeneralCommandLine){
     runAndLog(project, cmd,true)
 }
+
+public fun runAndLog(project: Project, cmds: List<String>,clear:Boolean?) {
+    val cmd = GeneralCommandLine(cmds)
+        .withWorkDirectory(project.basePath)
+        .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.SYSTEM)
+    runAndLog(project,cmd,clear)
+}
 public fun runAndLog(project: Project, cmd: GeneralCommandLine,clear:Boolean?) {
     val output = ExecUtil.execAndGetOutput(cmd)
     WriteCommandAction.runWriteCommandAction(project) {
@@ -107,32 +114,6 @@ public fun runAndLog(project: Project, cmd: GeneralCommandLine,clear:Boolean?) {
     }
 }
 
-public fun runAndLog(project: Project, cmds: List<String>,clear:Boolean?) {
-    val cmd = GeneralCommandLine(cmds)
-        .withWorkDirectory(project.basePath)
-    val output = ExecUtil.execAndGetOutput(cmd)
-    WriteCommandAction.runWriteCommandAction(project) {
-        if(clear == true){
-            clearConsole(project)
-        }
-        infoConsole(project, *formatCmd(cmds))
-        if (output.exitCode != 0) {
-            if (output.stdout.trim().isNotEmpty()) {
-                errorConsole(project, output.stdout)
-            }
-            if (output.stderr.trim().isNotEmpty()) {
-                errorConsole(project, output.stderr)
-            }
-        } else {
-            if (output.stdout.trim().isNotEmpty()) {
-                infoConsole(project, output.stdout)
-            }
-            if (output.stderr.trim().isNotEmpty()) {
-                infoConsole(project, output.stderr)
-            }
-        }
-    }
-}
 
 public fun infoConsole(project: Project, vararg str: String) {
     val c = getConsole(project)

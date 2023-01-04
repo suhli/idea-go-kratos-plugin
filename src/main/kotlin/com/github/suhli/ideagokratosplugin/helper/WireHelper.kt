@@ -167,7 +167,8 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
     val documentManager = PsiDocumentManager.getInstance(project)
 
     val exe = GoSdkUtil.findExecutableInGoPath("wire", dir.project, null) ?: return null
-    val cmd = GeneralCommandLine(exe.path, targetDir.virtualFile.canonicalPath)
+    val paths = DirHelper.split(targetDir.virtualFile.canonicalPath!!)
+    val cmd = GeneralCommandLine(exe.path, DirHelper.join(*paths))
         .withWorkDirectory(project.basePath)
     val tasks = arrayListOf<KratosTask>()
 

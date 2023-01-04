@@ -11,12 +11,18 @@ class DirHelper {
             return dir.split("/").toTypedArray()
         }
 
-        fun join(dir:String,vararg target:String): String {
+        fun join(vararg target:String): String {
             val dirs = arrayListOf<String>()
-            dirs.addAll(dir.split(File.separator))
             dirs.addAll(target)
             return dirs.joinToString(File.separator)
         }
+
+//        fun join(dir:String,vararg target:String): String {
+//            val dirs = arrayListOf<String>()
+//            dirs.addAll(dir.split(File.separator))
+//            dirs.addAll(target)
+//            return dirs.joinToString(File.separator)
+//        }
 
         fun cd(dir:PsiDirectory,path:String) :PsiDirectory?{
             var target = dir
