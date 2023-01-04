@@ -4,8 +4,11 @@
 
 ## [Unreleased]
 
+## [0.0.7]
+adapt windows
+all output redirect to tool window
+
 ## [0.0.5]
-chore: bump goland to 223
 
 ## [0.0.2]
 
