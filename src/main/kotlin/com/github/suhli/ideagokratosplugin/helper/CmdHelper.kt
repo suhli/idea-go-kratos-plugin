@@ -12,29 +12,10 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.runBackgroundableTask
 import com.intellij.openapi.project.Project
 
-private fun errorAlert(project: Project, task: String, message: String?) {
-    Notifications.Bus.notify(
-        Notification(
-            "com.github.suhli.ideagokratosplugin",
-            "$task failed:\n${message ?: ""}",
-            NotificationType.ERROR
-        ), project
-    )
-}
-
-private fun runTask(project: Project, taskName: String, t: KratosTask) {
-    val result = t.runnable()
-    if (result?.exception != null && !result.dismiss) {
-        errorAlert(project, taskName, result.message)
-    }
-}
-
-fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<KratosTask>,dismiss:Boolean?) {
+fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<KratosTask>) {
     if (tasks.isEmpty()) {
         return
     }
-    val editor = FileEditorManager.getInstance(project).selectedTextEditor
-
     runBackgroundableTask(taskName, project, true) {
         it.isIndeterminate = false
         val size = tasks.size
@@ -42,24 +23,16 @@ fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<Kr
         for ((i, t) in tasks.withIndex()) {
             if (t.needWrite) {
                 WriteCommandAction.runWriteCommandAction(project) {
-                    runTask(project, taskName, t)
+                    t.runnable.run()
                 }
             } else {
-                runTask(project, taskName, t)
+                t.runnable.run()
             }
             it.fraction = ((i + 1) / size).toDouble()
         }
         it.fraction = 1.0
-        if (editor != null && dismiss != true) {
-            Notifications.Bus.notify(
-                Notification(
-                    "com.github.suhli.ideagokratosplugin",
-                    "$taskName done!",
-                    NotificationType.INFORMATION
-                ), project
-            )
-        }
         project.projectFile?.refresh(false, true)
         DaemonCodeAnalyzer.getInstance(project).restart();
+        infoConsole(project,"$taskName done")
     }
 }

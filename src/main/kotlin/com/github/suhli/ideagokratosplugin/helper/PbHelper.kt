@@ -70,22 +70,9 @@ fun genPbTask(file: PsiFile): KratosTask? {
     cmds.add("--proto_path=${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
     cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
     cmds.add(DirHelper.join(project.basePath!!, parentPath, file.name))
-    val cmd = GeneralCommandLine(cmds)
-        .withWorkDirectory(project.basePath)
     return KratosTask(
         {
-            val output = ExecUtil.execAndGetOutput(cmd)
-            WriteCommandAction.runWriteCommandAction(project) {
-                clearConsole(project)
-                infoConsole(project, cmd.commandLineString)
-                if (output.exitCode != 0) {
-                    errorConsole(project, output.stdout)
-                    errorConsole(project, output.stderr)
-                } else {
-                    infoConsole(project, output.stdout)
-                    infoConsole(project, output.stderr)
-                }
-            }
+            runAndLog(project, cmds)
             KratosTaskResult.dismiss()
         },
         "Generate Client Task"
@@ -104,23 +91,9 @@ fun genClientTask(file: PsiFile): KratosTask? {
     cmds.add("--go-http_out=paths=source_relative:${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
     cmds.add("--go-grpc_out=paths=source_relative:${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
     cmds.add(DirHelper.join(project.basePath!!, *parentPath.split("/").toTypedArray(), file.name))
-    val cmd = GeneralCommandLine(cmds)
-        .withWorkDirectory(project.basePath)
-
     return KratosTask(
         {
-            val output = ExecUtil.execAndGetOutput(cmd)
-            WriteCommandAction.runWriteCommandAction(project) {
-                clearConsole(project)
-                infoConsole(project, cmd.commandLineString)
-                if (output.exitCode != 0) {
-                    errorConsole(project, output.stdout)
-                    errorConsole(project, output.stderr)
-                } else {
-                    infoConsole(project, output.stdout)
-                    infoConsole(project, output.stderr)
-                }
-            }
+            runAndLog(project, cmds)
             KratosTaskResult.dismiss()
         },
         "Generate Client Task"

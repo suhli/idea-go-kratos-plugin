@@ -16,6 +16,6 @@ class KratosWireAllAction : AnAction("Run Wire All") {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val tasks = genAllWire(project)
-        runKratosTaskInBackground("generate all wire", project,tasks,false)
+        runKratosTaskInBackground("generate all wire", project,tasks)
     }
 }

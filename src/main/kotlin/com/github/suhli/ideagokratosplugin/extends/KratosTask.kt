@@ -31,5 +31,5 @@ class KratosTaskResult {
     }
 }
 
-class KratosTask(val runnable: () -> KratosTaskResult?, val name: String, val needWrite: Boolean = false) {
+class KratosTask(val runnable: Runnable, val name: String, val needWrite: Boolean = false) {
 }

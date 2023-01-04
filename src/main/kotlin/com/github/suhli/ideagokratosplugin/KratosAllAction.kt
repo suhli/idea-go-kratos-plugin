@@ -21,6 +21,6 @@ class KratosAllAction : DumbAwareAction("Kratos All") {
         if (tasks.isEmpty()) {
             return
         }
-        runKratosTaskInBackground("run kratos all",project,tasks,false)
+        runKratosTaskInBackground("run kratos all",project,tasks)
     }
 }

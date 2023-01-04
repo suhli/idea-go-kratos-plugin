@@ -21,9 +21,9 @@ import java.nio.charset.Charset
 
 private const val TOKEN = "wired"
 
-private var LOG:Logger? = null
+private var LOG: Logger? = null
 private fun getLogger(): Logger {
-    if(LOG == null){
+    if (LOG == null) {
         LOG = Logger.getInstance("WireHelper")
     }
     return LOG!!
@@ -105,7 +105,7 @@ private fun packageToImport(v: GoPackage): String {
     return toImport(v.getImportPath(false)!!)
 }
 
-private fun toImport(v:String): String {
+private fun toImport(v: String): String {
     return """"$v""""
 }
 
@@ -119,7 +119,7 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
     }
     val providerSets = collectProviderSets(dir)
     val notExistRequirements = scanForNotProvideTypes(providerSets)
-    val injectionImports = providerSets.map{ v -> packageToImport(v.goPkg) }
+    val injectionImports = providerSets.map { v -> packageToImport(v.goPkg) }
     val injections = providerSets.joinToString(",") { v -> """${v.pkg.name}.${v.name}""" }
     val notExistRequirementsImports = hashSetOf<String>()
     val notExistsRequirementDeclarations = hashSetOf<String>()
@@ -127,11 +127,11 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
     for (notExists in notExistRequirements) {
         notExistRequirementsImports.add(packageToImport(notExists.pkg))
         var declaration = notExists.type.text
-        if(!declaration.contains(".")) {
-            if(notExists.type is GoPointerType){
-                declaration  = "*${notExists.pkg.name}.${declaration.replace("*","")}"
-            }else{
-                declaration  = "${notExists.pkg.name}.${declaration}"
+        if (!declaration.contains(".")) {
+            if (notExists.type is GoPointerType) {
+                declaration = "*${notExists.pkg.name}.${declaration.replace("*", "")}"
+            } else {
+                declaration = "${notExists.pkg.name}.${declaration}"
             }
 
         }
@@ -153,7 +153,9 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
                
                
                // wireApp init kratos application.
-               func wireApp(${notExistsRequirementDeclarations.sorted().joinToString(",")}) (*kratos.App, func(), error){
+               func wireApp(${
+        notExistsRequirementDeclarations.sorted().joinToString(",")
+    }) (*kratos.App, func(), error){
                     panic(wire.Build($injections, newApp))
                }
             """.trimIndent()
@@ -166,7 +168,6 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
 
     val exe = GoSdkUtil.findExecutableInGoPath("wire", dir.project, null) ?: return null
     val cmd = GeneralCommandLine(exe.path, targetDir.virtualFile.canonicalPath)
-        .withCharset(Charset.forName("UTF-8"))
         .withWorkDirectory(project.basePath)
     val tasks = arrayListOf<KratosTask>()
 
@@ -175,7 +176,7 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
             val parent = providerSet.parent
             parent.files.find { v -> v.name == providerSet.fileName }?.delete()
             parent.add(providerSet.buildFile())
-            KratosTaskResult.success()
+            infoConsole(project, "generate ${providerSet.fileName} done")
         }, "Generate Provider Set${providerSet.fileName}", true)
     })
     tasks.add(KratosTask({
@@ -184,17 +185,10 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
         val doc = documentManager.getDocument(file)!!
         doc.insertString(0, comment)
         documentManager.commitDocument(doc)
-        KratosTaskResult.success()
+        infoConsole(project, "generate wire.go done")
     }, "Generate Wire File", true))
     tasks.add(KratosTask({
-        getLogger().info("will run:${cmd.commandLineString}")
-        val output = ExecUtil.execAndGetOutput(cmd)
-        getLogger().info("wire command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
-        if (output.exitCode != 0) {
-            KratosTaskResult.error(RuntimeException(output.stderr))
-        } else {
-            KratosTaskResult.success()
-        }
+        runAndLog(project, cmd, false)
     }, "Wire Command"))
     return tasks
 }
