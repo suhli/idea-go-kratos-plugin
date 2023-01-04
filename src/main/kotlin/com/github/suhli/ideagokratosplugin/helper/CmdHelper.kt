@@ -24,12 +24,12 @@ private fun errorAlert(project: Project, task: String, message: String?) {
 
 private fun runTask(project: Project, taskName: String, t: KratosTask) {
     val result = t.runnable()
-    if (result?.exception != null) {
+    if (result?.exception != null && !result.dismiss) {
         errorAlert(project, taskName, result.message)
     }
 }
 
-fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<KratosTask>) {
+fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<KratosTask>,dismiss:Boolean?) {
     if (tasks.isEmpty()) {
         return
     }
@@ -50,7 +50,7 @@ fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<Kr
             it.fraction = ((i + 1) / size).toDouble()
         }
         it.fraction = 1.0
-        if (editor != null) {
+        if (editor != null && dismiss != true) {
             Notifications.Bus.notify(
                 Notification(
                     "com.github.suhli.ideagokratosplugin",

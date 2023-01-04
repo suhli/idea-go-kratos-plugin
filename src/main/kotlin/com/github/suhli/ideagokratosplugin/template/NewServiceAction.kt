@@ -59,7 +59,7 @@ class NewServiceAction : DumbAwareAction("Kratos New Service") {
                     } else {
                         KratosTaskResult.success()
                     }
-                }, "new kratos no mod")))
+                }, "new kratos no mod")),false)
             }
 
 

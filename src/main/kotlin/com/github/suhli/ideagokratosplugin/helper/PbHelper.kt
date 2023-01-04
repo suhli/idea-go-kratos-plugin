@@ -4,10 +4,21 @@ import com.github.suhli.ideagokratosplugin.extends.KratosTask
 import com.github.suhli.ideagokratosplugin.extends.KratosTaskResult
 import com.github.suhli.ideagokratosplugin.pb.KratosPbAction
 import com.github.suhli.ideagokratosplugin.pb.KratosPbClientAction
+import com.goide.GoIcons
 import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.filters.TextConsoleBuilderFactory
+import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.execution.ui.ConsoleView
+import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.util.ExecUtil
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.RegisterToolWindowTask
+import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowAnchor
+import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.openapi.wm.impl.ToolWindowManagerImpl
 import com.intellij.protobuf.ide.settings.PbProjectSettings
 import com.intellij.protobuf.lang.PbFileType
 import com.intellij.protobuf.lang.psi.PbFile
@@ -16,8 +27,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.toolWindow.ToolWindowEventSource
 import java.io.File
-import java.nio.charset.Charset
 
 private var LOG: Logger? = null
 private fun getLogger(): Logger {
@@ -26,7 +37,6 @@ private fun getLogger(): Logger {
     }
     return LOG!!
 }
-
 
 private fun findDependency(file: PsiFile): HashSet<String> {
     val result = hashSetOf<String>()
@@ -57,22 +67,26 @@ fun genPbTask(file: PsiFile): KratosTask? {
     otherPaths.addAll(findDependency(file))
     val cmds = arrayListOf("protoc")
     cmds.addAll(otherPaths)
-    cmds.add("--proto_path=${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
-    cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
-    cmds.add(DirHelper.join(project.basePath!!,parentPath,file.name))
+    cmds.add("--proto_path=${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
+    cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
+    cmds.add(DirHelper.join(project.basePath!!, parentPath, file.name))
     val cmd = GeneralCommandLine(cmds)
-        .withCharset(Charset.forName("UTF-8"))
         .withWorkDirectory(project.basePath)
     return KratosTask(
         {
-            getLogger().info("will run pb command:${cmd.commandLineString}")
             val output = ExecUtil.execAndGetOutput(cmd)
-            getLogger().info("pb command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
-            if (output.exitCode != 0) {
-                KratosTaskResult.error(RuntimeException(output.stderr))
-            } else {
-                KratosTaskResult.success()
+            WriteCommandAction.runWriteCommandAction(project) {
+                clearConsole(project)
+                infoConsole(project, cmd.commandLineString)
+                if (output.exitCode != 0) {
+                    errorConsole(project, output.stdout)
+                    errorConsole(project, output.stderr)
+                } else {
+                    infoConsole(project, output.stdout)
+                    infoConsole(project, output.stderr)
+                }
             }
+            KratosTaskResult.dismiss()
         },
         "Generate Client Task"
     )
@@ -85,24 +99,29 @@ fun genClientTask(file: PsiFile): KratosTask? {
     otherPaths.addAll(findDependency(file))
     val cmds = arrayListOf("protoc")
     cmds.addAll(otherPaths)
-    cmds.add("--proto_path=${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
-    cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
-    cmds.add("--go-http_out=paths=source_relative:${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
-    cmds.add("--go-grpc_out=paths=source_relative:${DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray())}")
-    cmds.add(DirHelper.join(project.basePath!!,*parentPath.split("/").toTypedArray(),file.name))
+    cmds.add("--proto_path=${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
+    cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
+    cmds.add("--go-http_out=paths=source_relative:${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
+    cmds.add("--go-grpc_out=paths=source_relative:${DirHelper.join(project.basePath!!, *DirHelper.split(parentPath))}")
+    cmds.add(DirHelper.join(project.basePath!!, *parentPath.split("/").toTypedArray(), file.name))
     val cmd = GeneralCommandLine(cmds)
-        .withCharset(Charset.forName("UTF-8"))
         .withWorkDirectory(project.basePath)
+
     return KratosTask(
         {
-            getLogger().info("will run client command:${cmd.commandLineString}")
             val output = ExecUtil.execAndGetOutput(cmd)
-            getLogger().info("client command code:${output.exitCode} output:${output.stdout} err:${output.stderr}")
-            if (output.exitCode != 0) {
-                KratosTaskResult.error(RuntimeException(output.stderr))
-            } else {
-                KratosTaskResult.success()
+            WriteCommandAction.runWriteCommandAction(project) {
+                clearConsole(project)
+                infoConsole(project, cmd.commandLineString)
+                if (output.exitCode != 0) {
+                    errorConsole(project, output.stdout)
+                    errorConsole(project, output.stderr)
+                } else {
+                    infoConsole(project, output.stdout)
+                    infoConsole(project, output.stderr)
+                }
             }
+            KratosTaskResult.dismiss()
         },
         "Generate Client Task"
     )

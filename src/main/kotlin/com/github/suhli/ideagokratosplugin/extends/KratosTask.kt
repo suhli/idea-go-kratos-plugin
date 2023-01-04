@@ -3,6 +3,12 @@ package com.github.suhli.ideagokratosplugin.extends
 
 class KratosTaskResult {
     companion object{
+
+        fun dismiss():KratosTaskResult{
+            val res = KratosTaskResult()
+            res.dismiss = true
+            return res
+        }
         fun success(): KratosTaskResult {
             return KratosTaskResult()
         }
@@ -12,6 +18,8 @@ class KratosTaskResult {
             return res
         }
     }
+
+    var dismiss = false;
 
     var exception: RuntimeException? = null
     var message: String? = null

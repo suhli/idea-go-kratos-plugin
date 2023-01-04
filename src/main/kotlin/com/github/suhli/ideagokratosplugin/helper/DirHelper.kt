@@ -7,6 +7,10 @@ import java.io.File
 class DirHelper {
     companion object{
 
+        fun split(dir: String):Array<String>{
+            return dir.split("/").toTypedArray()
+        }
+
         fun join(dir:String,vararg target:String): String {
             val dirs = arrayListOf<String>()
             dirs.addAll(dir.split(File.separator))

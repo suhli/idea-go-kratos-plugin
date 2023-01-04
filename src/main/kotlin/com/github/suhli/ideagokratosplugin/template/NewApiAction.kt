@@ -40,7 +40,7 @@ class NewApiAction : DumbAwareAction("Kratos New Api") {
                     } else {
                         KratosTaskResult.success()
                     }
-                }, "new kratos no mod")))
+                }, "new kratos no mod")),false)
             }
 
 

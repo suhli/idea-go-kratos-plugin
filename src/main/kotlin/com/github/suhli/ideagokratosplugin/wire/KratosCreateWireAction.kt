@@ -19,7 +19,7 @@ class KratosCreateWireAction : DumbAwareAction("Run Create Wire") {
         val file: PsiFile = e.getData(CommonDataKeys.PSI_FILE) ?: return
         val project: Project = e.getData(CommonDataKeys.PROJECT) ?: return
         val task = genWire(file) ?: return
-        runKratosTaskInBackground("generate wire", project,task)
+        runKratosTaskInBackground("generate wire", project,task,false)
     }
 
 }

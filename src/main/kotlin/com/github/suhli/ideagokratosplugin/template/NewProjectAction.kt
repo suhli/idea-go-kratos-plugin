@@ -41,7 +41,7 @@ class NewProjectNoModAction : DumbAwareAction("Kratos New No Mod") {
                     } else {
                         KratosTaskResult.success()
                     }
-                }, "new kratos no mod")))
+                }, "new kratos no mod")),false)
             }
 
 
