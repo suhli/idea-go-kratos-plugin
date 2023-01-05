@@ -22,7 +22,6 @@ private fun getFieldFromProtobuf(element: PbServiceMethod): List<KratosRpcField>
     return KratosRpcField.getFieldsInMessageTypeName(arg)
 }
 
-
 fun createHttpInRestClient(element: PsiElement, method: String, path: String) {
     if (element is PbServiceMethod) {
         var p = path
