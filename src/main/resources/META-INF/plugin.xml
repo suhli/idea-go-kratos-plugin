@@ -84,7 +84,10 @@
         <runLineMarkerContributor language=""
                                   implementationClass="com.github.suhli.ideagokratosplugin.KratosRunCommentMarkerContributor"/>
         <codeInsight.lineMarkerProvider language="protobuf"
-                                        implementationClass="com.github.suhli.ideagokratosplugin.marker.RunGrpcMarkerProvider"/>
+                                        implementationClass="com.github.suhli.ideagokratosplugin.marker.RunInRestClientMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="protobuf"
+                                        implementationClass="com.github.suhli.ideagokratosplugin.marker.FindProtoServiceImplementMarkerProvider"
+        />
     </extensions>
     <actions>
         <action class="com.github.suhli.ideagokratosplugin.wire.KratosCreateWireAction"
@@ -106,8 +109,8 @@
             <add-to-group group-id="NewGroup"/>
         </group>
         <group
-            id="com.github.suhli.ideagokratosplugin.actions"
-            text="Kratos Actions"
+                id="com.github.suhli.ideagokratosplugin.actions"
+                text="Kratos Actions"
         >
             <action class="com.github.suhli.ideagokratosplugin.KratosAllAction"
                     id="com.github.suhli.ideagokratosplugin.KratosPbAllAction"

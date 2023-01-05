@@ -7,15 +7,12 @@ import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProvider
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.editor.markup.GutterIconRenderer
-import com.intellij.protobuf.lang.annotation.Proto3Annotator
 import com.intellij.protobuf.lang.psi.*
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.findParentOfType
-import java.awt.event.MouseEvent
-import java.util.function.Supplier
 
-class RunGrpcMarkerProvider : LineMarkerProvider {
+class RunInRestClientMarkerProvider : LineMarkerProvider {
     private val HTTP_KEYS = arrayListOf("get", "put", "post", "delete", "patch")
 
 
