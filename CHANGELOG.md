@@ -4,9 +4,10 @@
 
 ## [Unreleased]
 
+## [0.0.9]
+fix: stackoverflow
+
 ## [0.0.7]
-adapt windows
-all output redirect to tool window
 
 ## [0.0.5]
 
