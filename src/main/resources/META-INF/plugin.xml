@@ -86,8 +86,11 @@
         <codeInsight.lineMarkerProvider language="protobuf"
                                         implementationClass="com.github.suhli.ideagokratosplugin.marker.RunInRestClientMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="protobuf"
-                                        implementationClass="com.github.suhli.ideagokratosplugin.marker.FindProtoServiceImplementMarkerProvider"
+                                        implementationClass="com.github.suhli.ideagokratosplugin.marker.FindProtoServiceImplementMarkerProvider"/>
+        <gotoDeclarationHandler
+            implementation="com.github.suhli.ideagokratosplugin.PbGoToDeclarationProvider"
         />
+        <actionOnSave implementation="com.github.suhli.ideagokratosplugin.pb.KratosActionOnSave" />
     </extensions>
     <actions>
         <action class="com.github.suhli.ideagokratosplugin.wire.KratosCreateWireAction"

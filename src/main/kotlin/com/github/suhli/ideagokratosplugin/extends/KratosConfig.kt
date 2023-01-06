@@ -1,9 +1,13 @@
 package com.github.suhli.ideagokratosplugin.extends
 
+import com.github.suhli.ideagokratosplugin.helper.DirHelper
 import com.intellij.openapi.diagnostic.Logger
 
 class KratosConfig {
     public var wireLocation = ""
+        get() {
+            return DirHelper.join(*wireLocation.split("/").toTypedArray())
+        }
     public var layoutRepository = ""
 
     companion object {
