@@ -114,8 +114,8 @@ private fun genWire(dir: PsiDirectory, config: KratosConfig): List<KratosTask>? 
 
     val project = dir.project
     var targetDir = dir
-    if (config.wireLocation.isNotEmpty()) {
-        targetDir = DirHelper.cd(dir, config.wireLocation) ?: throw RuntimeException("no such dir")
+    if (config.getWireLocation().isNotEmpty()) {
+        targetDir = DirHelper.cd(dir, config.getWireLocation()) ?: throw RuntimeException("no such dir")
     }
     val providerSets = collectProviderSets(dir)
     val notExistRequirements = scanForNotProvideTypes(providerSets)

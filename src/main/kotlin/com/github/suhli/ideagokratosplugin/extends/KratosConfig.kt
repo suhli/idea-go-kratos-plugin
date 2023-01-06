@@ -4,11 +4,13 @@ import com.github.suhli.ideagokratosplugin.helper.DirHelper
 import com.intellij.openapi.diagnostic.Logger
 
 class KratosConfig {
-    public var wireLocation = ""
-        get() {
-            return DirHelper.join(*wireLocation.split("/").toTypedArray())
-        }
+    private var wireLocation = ""
+
     public var layoutRepository = ""
+
+    fun getWireLocation(): String {
+            return DirHelper.join(*wireLocation.split("/").toTypedArray())
+    }
 
     companion object {
         private val LOG = Logger.getInstance(KratosConfig::class.java)
