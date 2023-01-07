@@ -11,6 +11,8 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.runBackgroundableTask
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
+import java.nio.file.Path
 
 fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<KratosTask>) {
     if (tasks.isEmpty()) {
@@ -31,7 +33,8 @@ fun runKratosTaskInBackground(taskName: String, project: Project, tasks: List<Kr
             it.fraction = ((i + 1) / size).toDouble()
         }
         it.fraction = 1.0
-        project.projectFile?.refresh(false, true)
+        val path = project.basePath?.let { it1 -> Path.of(it1) } ?: return@runBackgroundableTask infoConsole(project,"$taskName done")
+        LocalFileSystem.getInstance().findFileByNioFile(path)?.refresh(false, true)
         DaemonCodeAnalyzer.getInstance(project).restart();
         infoConsole(project,"$taskName done")
     }
