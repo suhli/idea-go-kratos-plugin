@@ -86,7 +86,6 @@ public fun runAndLog(project: Project, cmd: GeneralCommandLine){
 public fun runAndLog(project: Project, cmds: List<String>,clear:Boolean?) {
     val cmd = GeneralCommandLine(cmds)
         .withWorkDirectory(project.basePath)
-        .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.SYSTEM)
     runAndLog(project,cmd,clear)
 }
 public fun runAndLog(project: Project, cmd: GeneralCommandLine,clear:Boolean?) {
