@@ -2,9 +2,8 @@ package com.github.suhli.ideagokratosplugin.extends
 
 import com.intellij.protobuf.lang.psi.PbMessageBody
 import com.intellij.protobuf.lang.psi.PbTypeName
-import javax.annotation.Nullable
 
-class KratosRpcField(val name: String, val isRepeat: Boolean, @Nullable val children: List<KratosRpcField>?) {
+class KratosRpcField(val name: String, val isRepeat: Boolean, val children: List<KratosRpcField>?) {
     companion object{
         public fun getFieldsInMessageTypeName(name: PbTypeName): List<KratosRpcField> {
             val fields = arrayListOf<KratosRpcField>()

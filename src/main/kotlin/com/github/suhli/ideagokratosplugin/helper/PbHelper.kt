@@ -23,7 +23,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.DefinitionsScopedSearch
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.findParentOfType
-import com.intellij.util.castSafelyTo
 import java.io.File
 
 private var LOG: Logger? = null
@@ -158,7 +157,10 @@ fun findImplementMethodFromCli(element: GoReferenceExpression): GoMethodDeclarat
     if (!file.name.endsWith(".pb.go")) {
         return null
     }
-    val cli = declareMethod.parent.parent.parent.castSafelyTo<GoTypeSpec>() ?: return null
-    val serverName = cli.name?.replace("Client", "") ?: return null
-    return findPbImplementByName(file, serverName, element.reference.canonicalText)
+    val cliElem = declareMethod.parent.parent.parent ?: return null;
+    if (cliElem is GoTypeSpec) {
+        val serverName = cliElem.name?.replace("Client", "") ?: return null
+        return findPbImplementByName(file, serverName, element.reference.canonicalText)
+    }
+    return null;
 }

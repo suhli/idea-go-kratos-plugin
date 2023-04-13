@@ -7,7 +7,6 @@ import com.intellij.navigation.GotoRelatedItem
 import com.intellij.navigation.GotoRelatedProvider
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
-import com.intellij.util.castSafelyTo
 
 
 class PbGoToDeclarationProvider : GotoDeclarationHandler {
@@ -16,8 +15,9 @@ class PbGoToDeclarationProvider : GotoDeclarationHandler {
         offset: Int,
         editor: Editor?
     ): Array<PsiElement>? {
-        if (element?.parent is GoReferenceExpression) {
-            val declaration = findImplementMethodFromCli(element.parent.castSafelyTo<GoReferenceExpression>() ?: return null)
+        val expr = element?.parent ?: return null;
+        if (expr is GoReferenceExpression) {
+            val declaration = findImplementMethodFromCli(expr)
             if(declaration != null){
                 return arrayOf(declaration)
             }
