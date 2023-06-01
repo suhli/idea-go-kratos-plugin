@@ -52,6 +52,24 @@ private fun findDependency(file: PsiFile): HashSet<String> {
     return result
 }
 
+private fun additionalArgs(file: PsiFile): HashSet<String>{
+    val result = hashSetOf<String>()
+    if (file !is PbFile) {
+        return result
+    }
+    val dependsComments = file.children.filter { v -> v is PsiComment && v.text.contains("additional:") }
+    for (comment in dependsComments) {
+        val text = comment.text
+        val match = Regex("depends:(.+)").find(text)
+        var additional = match?.groupValues?.find { m -> !m.contains("depends") } ?: ""
+
+        if (additional.isNotEmpty()) {
+            result.add(additional)
+        }
+    }
+    return result
+}
+
 fun genPbTask(file: PsiFile): KratosTask? {
     if (file !is PbFile) {
         return null
@@ -65,6 +83,7 @@ fun genPbTask(file: PsiFile): KratosTask? {
     cmds.add("--proto_path=${DirHelper.join(project.basePath!!, *parentPath)}")
     cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
     cmds.add(DirHelper.join(project.basePath!!, *parentPath, file.name))
+    cmds.addAll(additionalArgs(file))
     return KratosTask(
         {
             runAndLog(project, cmds)
@@ -73,6 +92,7 @@ fun genPbTask(file: PsiFile): KratosTask? {
         "Generate Client Task"
     )
 }
+
 
 fun genClientTask(file: PsiFile): KratosTask? {
     val project = file.project
@@ -85,6 +105,7 @@ fun genClientTask(file: PsiFile): KratosTask? {
     cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
     cmds.add("--go-http_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
     cmds.add("--go-grpc_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
+    cmds.addAll(additionalArgs(file))
     cmds.add(DirHelper.join(project.basePath!!, *parentPath, file.name))
     return KratosTask(
         {
