@@ -29,9 +29,10 @@ layoutRepository=https://gitee.com/go-kratos/kratos-layout.git
 
 ## pb
 * 在pb文件添加注释//kratos:pb
-* (optional) 添加注释depends如:
+* (optional) 添加注释depends以添加protoc proto_path参数,如:
 > //depends:./third_party
-
+* (optional) 添加注释additional以添加额外的protoc参数,如:
+> //additional:--validate_out=lang=go,paths=source_relative:./
 ## 3. biz/service/data模板
 
 TODO

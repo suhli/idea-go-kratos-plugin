@@ -60,9 +60,8 @@ private fun additionalArgs(file: PsiFile): HashSet<String>{
     val dependsComments = file.children.filter { v -> v is PsiComment && v.text.contains("additional:") }
     for (comment in dependsComments) {
         val text = comment.text
-        val match = Regex("depends:(.+)").find(text)
-        var additional = match?.groupValues?.find { m -> !m.contains("depends") } ?: ""
-
+        val match = Regex("additional:(.+)").find(text)
+        val additional = match?.groupValues?.find { m -> !m.contains("additional") } ?: ""
         if (additional.isNotEmpty()) {
             result.add(additional)
         }
@@ -82,8 +81,8 @@ fun genPbTask(file: PsiFile): KratosTask? {
     cmds.addAll(otherPaths)
     cmds.add("--proto_path=${DirHelper.join(project.basePath!!, *parentPath)}")
     cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
-    cmds.add(DirHelper.join(project.basePath!!, *parentPath, file.name))
     cmds.addAll(additionalArgs(file))
+    cmds.add(DirHelper.join(project.basePath!!, *parentPath, file.name))
     return KratosTask(
         {
             runAndLog(project, cmds)
