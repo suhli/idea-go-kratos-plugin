@@ -1,14 +1,11 @@
 package com.github.suhli.ideagokratosplugin.helper
 
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findFileOrDirectory
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileSystemItem
-import com.intellij.util.ResourceUtil
 import java.io.File
-import java.nio.file.Path
 import java.nio.file.Paths
 
 class DirHelper {
@@ -45,8 +42,11 @@ class DirHelper {
 
         fun isFileInDir(path: String, name: String): Boolean {
             val p = Paths.get(path)
-            val file = VfsUtil.findFile(p, false) ?: return false
-            return file.findFileOrDirectory(name) != null
+            val file = VfsUtil.findFile(p,false) ?: return false
+            if (!file.isDirectory){
+                return false
+            }
+            return file.findChild(name) != null
         }
     }
 }

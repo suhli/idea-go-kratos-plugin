@@ -1,5 +1,5 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
-<idea-plugin require-restart="false" >
+<idea-plugin>
     <id>com.github.suhli.ideagokratosplugin</id>
     <name>Go Kratos</name>
     <vendor email="admin@shuhangli.com" url="https://github.com/suhli">suhli</vendor>

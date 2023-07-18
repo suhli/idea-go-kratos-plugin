@@ -41,10 +41,8 @@ private fun findDependency(file: PsiFile): HashSet<String> {
     if (file !is PbFile) {
         return result
     }
-    val dependsComments = file.children.filter { v -> v is PsiComment && v.text.contains("depends:") }
     val settings = PbProjectSettings.getInstance(file.project)
     val imports = file.children.filter { v -> v is PbImportStatement }
-    val project = file.project
     val exists = hashSetOf<String>()
     for (i in imports) {
         val name = i.children[0].text.replace("\"","")
