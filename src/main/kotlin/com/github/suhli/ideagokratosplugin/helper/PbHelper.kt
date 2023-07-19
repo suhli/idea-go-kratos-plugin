@@ -52,6 +52,7 @@ private fun setDependsOn(file: PsiFile) {
     val entryPaths =
         settings.importPathEntries.filter { v -> v.location.startsWith("file") }.map { v -> v.location.replace("file://","") }.toHashSet()
     val externalEntries = hashSetOf<String>()
+    val toRemove = hashSetOf<String>()
     for (i in dependsComments) {
         val target = i.text.replace("//dependsOn:", "").trim().split(" ")
         if (target.size < 2) {
@@ -67,7 +68,12 @@ private fun setDependsOn(file: PsiFile) {
             }
             val pkgDir = resolve.first().directories.first().path
             val toAddDir = DirHelper.join(pkgDir, path)
-            if (pkgDir.split("@")[0].endsWith(pkg) && !entryPaths.contains(toAddDir)) {
+            val paths = pkgDir.split("@")
+            if (paths[0].endsWith(pkg) && !entryPaths.contains(toAddDir)) {
+                val prev = entryPaths.find { v -> v.contains(pkg) && v.split("@").size == 2 &&  v.split("@")[1] != paths[1]}
+                if(prev != null){
+                    toRemove.add(prev)
+                }
                 externalEntries.add(toAddDir)
                 break
             }
@@ -76,7 +82,7 @@ private fun setDependsOn(file: PsiFile) {
     for (i in externalEntries) {
         entries.add(PbProjectSettings.ImportPathEntry("file://$i", ""))
     }
-    settings.importPathEntries = entries
+    settings.importPathEntries = entries.filter { v->!toRemove.contains(v.location.replace("file://","")) }.toList()
 }
 
 private fun findDependency(file: PsiFile): HashSet<String> {
