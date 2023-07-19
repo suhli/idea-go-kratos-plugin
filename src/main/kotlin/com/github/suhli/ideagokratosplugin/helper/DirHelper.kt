@@ -46,7 +46,7 @@ class DirHelper {
             if (!file.isDirectory){
                 return false
             }
-            return file.findChild(name) != null
+            return file.findFileByRelativePath(name) != null
         }
     }
 }
