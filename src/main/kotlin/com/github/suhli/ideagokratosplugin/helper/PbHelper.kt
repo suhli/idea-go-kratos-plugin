@@ -6,27 +6,23 @@ import com.github.suhli.ideagokratosplugin.pb.KratosPbAction
 import com.github.suhli.ideagokratosplugin.pb.KratosPbClientAction
 import com.goide.go.GoMethodInheritorsSearch
 import com.goide.psi.*
+import com.goide.psi.impl.imports.GoImportResolver
+import com.goide.sdk.GoPackageUtil
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.guessProjectDir
 import com.intellij.protobuf.ide.settings.PbProjectSettings
 import com.intellij.protobuf.lang.PbFileType
 import com.intellij.protobuf.lang.psi.PbFile
 import com.intellij.protobuf.lang.psi.PbImportStatement
 import com.intellij.protobuf.lang.psi.PbServiceDefinition
 import com.intellij.protobuf.lang.psi.PbServiceMethod
-import com.intellij.psi.PsiComment
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiManager
+import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
-import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.DefinitionsScopedSearch
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.findParentOfType
-import java.io.File
 
 private var LOG: Logger? = null
 private fun getLogger(): Logger {
@@ -36,48 +32,70 @@ private fun getLogger(): Logger {
     return LOG!!
 }
 
+private fun findProtoDir(entries: Set<String>, name: String): String? {
+    for (e in entries) {
+        if (e.startsWith("jar")) {
+            continue
+        }
+        val loc = e.replace("file://", "")
+        if (DirHelper.isFileInDir(loc, name)) {
+            return loc
+        }
+    }
+    return null
+}
+
+private fun setDependsOn(file: PsiFile) {
+    val settings = PbProjectSettings.getInstance(file.project)
+    val dependsComments = file.children.filter { v -> v is PsiComment && v.text.contains("dependsOn:") }
+    val entries = settings.importPathEntries
+    val entryPaths =
+        settings.importPathEntries.filter { v -> v.location.startsWith("file") }.map { v -> v.location.replace("file://","") }.toHashSet()
+    val externalEntries = hashSetOf<String>()
+    for (i in dependsComments) {
+        val target = i.text.replace("//dependsOn:", "").trim().split(" ")
+        if (target.size < 2) {
+            getLogger().error("not a effect comment:{}", i.text)
+            continue
+        }
+        val pkg = target[0]
+        val path = target[1]
+        for (r in GoImportResolver.EP_NAME.extensionList.iterator()) {
+            val resolve = r.resolve(pkg, file.project, null, ResolveState.initial()) ?: continue
+            if (resolve.isEmpty() || resolve.first().directories.size == 0) {
+                continue
+            }
+            val pkgDir = resolve.first().directories.first().path
+            val toAddDir = DirHelper.join(pkgDir, path)
+            if (pkgDir.split("@")[0].endsWith(pkg) && !entryPaths.contains(toAddDir)) {
+                externalEntries.add(toAddDir)
+                break
+            }
+        }
+    }
+    for (i in externalEntries) {
+        entries.add(PbProjectSettings.ImportPathEntry("file://$i", ""))
+    }
+    settings.importPathEntries = entries
+}
+
 private fun findDependency(file: PsiFile): HashSet<String> {
     val result = hashSetOf<String>()
     if (file !is PbFile) {
         return result
     }
+    setDependsOn(file)
     val settings = PbProjectSettings.getInstance(file.project)
     val imports = file.children.filter { v -> v is PbImportStatement }
     val exists = hashSetOf<String>()
+    val entries = settings.importPathEntries.filter { v -> v.location.startsWith("file") }
+        .map { v -> v.location.replace("file://", "") }.toSet()
     for (i in imports) {
-        val name = i.children[0].text.replace("\"","")
-        for (e in settings.importPathEntries) {
-            if (!e.location.startsWith("file")) {
-                continue
-            }
-            val loc = e.location.replace("file://", "")
-            if (exists.contains(loc)) {
-                continue
-            }
-            if (DirHelper.isFileInDir(loc, name)) {
-                exists.add(loc)
-                result.add("--proto_path=${loc}")
-            }
-        }
-//        val files = FilenameIndex.getVirtualFilesByName(fileName(i.children[0].text), GlobalSearchScope.projectScope(project))
-//        if(files.isEmpty()) continue
-//        val dir = files.first().findFileByRelativePath("..") ?: continue
-//        if(exists.contains(dir.path)){
-//            continue
-//        }
-//        exists.add(dir.path)
-//        result.add("--proto_path=${dir.path}")
+        val name = i.children[0].text.replace("\"", "")
+        val loc = findProtoDir(entries, name) ?: continue
+        exists.add(loc)
+        result.add("--proto_path=${loc}")
     }
-//    for (comment in dependsComments) {
-//        val text = comment.text
-//        val match = Regex("depends:(.+)").find(text)
-//        var path = match?.groupValues?.find { m -> !m.contains("depends") } ?: ""
-//
-//        if (path.isNotEmpty()) {
-//            path = path.split("/").joinToString(File.separator)
-//            result.add("--proto_path=${path}")
-//        }
-//    }
     return result
 }
 
