@@ -70,7 +70,7 @@ private fun setDependsOn(file: PsiFile) {
             val toAddDir = DirHelper.join(pkgDir, path)
             val paths = pkgDir.split("@")
             if (paths[0].endsWith(pkg) && !entryPaths.contains(toAddDir)) {
-                val prev = entryPaths.find { v -> v.contains(pkg) && v.split("@").size == 2 &&  v.split("@")[1] != paths[1]}
+                val prev = entryPaths.find { v -> v.contains(pkg) && v.split("@").size == 2 &&  v.split("@")[1].replace(path,"") != paths[1]}
                 if(prev != null){
                     toRemove.add(prev)
                 }
