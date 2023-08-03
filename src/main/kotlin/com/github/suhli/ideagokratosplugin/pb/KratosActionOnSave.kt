@@ -13,7 +13,7 @@ class KratosActionOnSave : ActionOnSave() {
     override fun isEnabledForProject(project: Project): Boolean {
         return true
     }
-    override fun processDocuments(project: Project, documents: Array<out Document>) {
+    override fun processDocuments(project: Project, documents: Array<Document?>) {
         super.processDocuments(project, documents)
         val file = FileEditorManager.getInstance(project).selectedEditor?.file ?: return
         val f = PsiManager.getInstance(project).findFile(file)
