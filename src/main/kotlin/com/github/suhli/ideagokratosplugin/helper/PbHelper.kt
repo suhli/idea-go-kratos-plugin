@@ -50,7 +50,8 @@ private fun setDependsOn(file: PsiFile) {
     val dependsComments = file.children.filter { v -> v is PsiComment && v.text.contains("dependsOn:") }
     val entries = settings.importPathEntries
     val entryPaths =
-        settings.importPathEntries.filter { v -> v.location.startsWith("file") }.map { v -> v.location.replace("file://","") }.toHashSet()
+        settings.importPathEntries.filter { v -> v.location.startsWith("file") }
+            .map { v -> v.location.replace("file://", "") }.toHashSet()
     val externalEntries = hashSetOf<String>()
     val toRemove = hashSetOf<String>()
     for (i in dependsComments) {
@@ -70,8 +71,13 @@ private fun setDependsOn(file: PsiFile) {
             val toAddDir = DirHelper.join(pkgDir, path)
             val paths = pkgDir.split("@")
             if (paths[0].endsWith(pkg) && !entryPaths.contains(toAddDir)) {
-                val prev = entryPaths.find { v -> v.contains(pkg) && v.split("@").size == 2 &&  v.split("@")[1].replace(path,"") != paths[1]}
-                if(prev != null){
+                val prev = entryPaths.find { v ->
+                    v.contains(pkg) && v.split("@").size == 2 && v.split("@")[1].replace(
+                        path,
+                        ""
+                    ) != paths[1]
+                }
+                if (prev != null) {
                     toRemove.add(prev)
                 }
                 externalEntries.add(toAddDir)
@@ -82,7 +88,7 @@ private fun setDependsOn(file: PsiFile) {
     for (i in externalEntries) {
         entries.add(PbProjectSettings.ImportPathEntry("file://$i", ""))
     }
-    settings.importPathEntries = entries.filter { v->!toRemove.contains(v.location.replace("file://","")) }.toList()
+    settings.importPathEntries = entries.filter { v -> !toRemove.contains(v.location.replace("file://", "")) }.toList()
 }
 
 private fun findDependency(file: PsiFile): HashSet<String> {
@@ -127,15 +133,16 @@ fun genPbTask(file: PsiFile): KratosTask? {
         return null
     }
     val project = file.project
-    val parentPath = DirHelper.split(DirHelper.relativeToRoot(file.parent ?: return null) ?: return null)
+    val path = file.parent?.virtualFile?.path ?: return null
+    val parentPathRelative = DirHelper.relativeToRoot(project, path) ?: return null
     val otherPaths = hashSetOf<String>()
     otherPaths.addAll(findDependency(file))
     val cmds = arrayListOf("protoc")
     cmds.addAll(otherPaths)
-    cmds.add("--proto_path=${DirHelper.join(project.basePath!!, *parentPath)}")
-    cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
+    cmds.add("--proto_path=$parentPathRelative")
+    cmds.add("--go_out=paths=source_relative:$parentPathRelative")
     cmds.addAll(additionalArgs(file))
-    cmds.add(DirHelper.join(project.basePath!!, *parentPath, file.name))
+    cmds.add(DirHelper.join(*DirHelper.split(parentPathRelative), file.name))
     return KratosTask(
         {
             runAndLog(project, cmds)
@@ -148,17 +155,18 @@ fun genPbTask(file: PsiFile): KratosTask? {
 
 fun genClientTask(file: PsiFile): KratosTask? {
     val project = file.project
-    val parentPath = DirHelper.split(DirHelper.relativeToRoot(file.parent ?: return null) ?: return null)
+    val path = file.parent?.virtualFile?.path ?: return null
+    val parentPathRelative = DirHelper.relativeToRoot(project, path) ?: return null
     val otherPaths = hashSetOf<String>()
     otherPaths.addAll(findDependency(file))
     val cmds = arrayListOf("protoc")
     cmds.addAll(otherPaths)
-    cmds.add("--proto_path=${DirHelper.join(project.basePath!!, *parentPath)}")
-    cmds.add("--go_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
-    cmds.add("--go-http_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
-    cmds.add("--go-grpc_out=paths=source_relative:${DirHelper.join(project.basePath!!, *parentPath)}")
+    cmds.add("--proto_path=$parentPathRelative")
+    cmds.add("--go_out=paths=source_relative:$parentPathRelative")
+    cmds.add("--go-http_out=paths=source_relative:$parentPathRelative")
+    cmds.add("--go-grpc_out=paths=source_relative:$parentPathRelative")
     cmds.addAll(additionalArgs(file))
-    cmds.add(DirHelper.join(project.basePath!!, *parentPath, file.name))
+    cmds.add(DirHelper.join(*DirHelper.split(parentPathRelative), file.name))
     return KratosTask(
         {
             runAndLog(project, cmds)

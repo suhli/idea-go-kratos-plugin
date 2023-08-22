@@ -1,5 +1,6 @@
 package com.github.suhli.ideagokratosplugin.helper
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findFileOrDirectory
@@ -30,9 +31,25 @@ class DirHelper {
             return target
         }
 
+        fun relativeToRoot(project:Project,path:String):String?{
+            val root = project.basePath ?: return null
+            var p = path.replace(root, "")
+            // / -> ./
+            if (p.startsWith(File.separator)) {
+                p = ".$p"
+            }
+            // xxx -> ./xxx
+            else if(!p.startsWith(".")){
+                p = ".${File.separator}$p"
+            }
+            return p
+        }
         fun relativeToRoot(file: PsiFileSystemItem): String? {
             val project = file.project
             val root = project.basePath ?: return null
+            if(!file.virtualFile.path.startsWith(root)){
+                return null
+            }
             var path = file.virtualFile.path.replace(root, "")
             if (path.startsWith(File.separator)) {
                 path = path.replaceFirst(File.separator, "")
